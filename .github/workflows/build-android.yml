@@ -9,6 +9,7 @@ on:
       - 'package.json'
       - 'capacitor.config.json'
       - 'www/**'
+      - 'scripts/**'
       - '.github/workflows/build-android.yml'
 
 permissions:
@@ -33,6 +34,11 @@ jobs:
           distribution: temurin
           java-version: '21'
 
+      - name: Install Python and Pillow
+        run: |
+          python -m pip install --upgrade pip
+          pip install Pillow
+
       - name: Install project dependencies
         run: npm install
 
@@ -41,6 +47,15 @@ jobs:
 
       - name: Sync application
         run: npx cap sync android
+
+      - name: Download official Kulzzy Radio logo
+        run: |
+          curl -fL \
+          https://raw.githubusercontent.com/kulzzy/app/main/icon-512.png \
+          -o kulzzy-icon-512.png
+
+      - name: Generate Android launcher icons
+        run: python scripts/generate-icons.py
 
       - name: Build APK
         working-directory: android
