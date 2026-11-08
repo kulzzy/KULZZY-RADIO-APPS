@@ -2,18 +2,24 @@ from pathlib import Path
 from PIL import Image, ImageOps
 import re
 
-# Official Kulzzy Radio logo
-source_path = Path("kulzzy-icon-512.png")
+print("STARTING KULZZY RADIO ICON GENERATION")
+
+# Downloaded official logo
+source_path = Path("kulzzy-logo.jpg")
 
 if not source_path.exists():
-    raise FileNotFoundError("Kulzzy Radio logo was not downloaded.")
+    raise FileNotFoundError("Official Kulzzy Radio logo is missing.")
 
 source = Image.open(source_path).convert("RGBA")
 
-# Android resources folder
+if source.width < 100 or source.height < 100:
+    raise RuntimeError("The downloaded logo is too small.")
+
+print(f"Official logo loaded: {source.width}x{source.height}")
+
 res = Path("android/app/src/main/res")
 
-# Generate standard Android launcher icons
+# Standard Android launcher icons
 sizes = {
     "mdpi": 48,
     "hdpi": 72,
@@ -26,23 +32,28 @@ for density, size in sizes.items():
     folder = res / f"mipmap-{density}"
     folder.mkdir(parents=True, exist_ok=True)
 
-    icon = Image.new("RGBA", (size, size), "#06122A")
+    background = Image.new("RGBA", (size, size), "#06122A")
 
     logo = ImageOps.contain(
         source,
-        (int(size * 0.80), int(size * 0.80)),
+        (int(size * 0.82), int(size * 0.82)),
         method=Image.Resampling.LANCZOS
     )
 
     x = (size - logo.width) // 2
     y = (size - logo.height) // 2
 
-    icon.alpha_composite(logo, (x, y))
+    background.alpha_composite(logo, (x, y))
 
-    icon.save(folder / "ic_launcher.png")
-    icon.save(folder / "ic_launcher_round.png")
+    background.convert("RGB").save(
+        folder / "ic_launcher.png"
+    )
 
-# Generate adaptive icon foreground
+    background.convert("RGB").save(
+        folder / "ic_launcher_round.png"
+    )
+
+# Adaptive launcher icon foreground
 drawable = res / "drawable"
 drawable.mkdir(parents=True, exist_ok=True)
 
@@ -50,7 +61,7 @@ foreground = Image.new("RGBA", (432, 432), (0, 0, 0, 0))
 
 logo = ImageOps.contain(
     source,
-    (250, 250),
+    (260, 260),
     method=Image.Resampling.LANCZOS
 )
 
@@ -58,9 +69,12 @@ x = (432 - logo.width) // 2
 y = (432 - logo.height) // 2
 
 foreground.alpha_composite(logo, (x, y))
-foreground.save(drawable / "ic_launcher_foreground.png")
 
-# Adaptive icon background
+foreground.save(
+    drawable / "ic_launcher_foreground.png"
+)
+
+# Background colour
 values = res / "values"
 values.mkdir(parents=True, exist_ok=True)
 
@@ -68,10 +82,11 @@ values.mkdir(parents=True, exist_ok=True)
     '''<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="kulzzy_icon_background">#06122A</color>
-</resources>'''
+</resources>''',
+    encoding="utf-8"
 )
 
-# Adaptive icon configuration
+# Android adaptive icon
 adaptive = res / "mipmap-anydpi-v26"
 adaptive.mkdir(parents=True, exist_ok=True)
 
@@ -81,21 +96,28 @@ adaptive_xml = '''<?xml version="1.0" encoding="utf-8"?>
     <foreground android:drawable="@drawable/ic_launcher_foreground"/>
 </adaptive-icon>'''
 
-(adaptive / "ic_launcher.xml").write_text(adaptive_xml)
-(adaptive / "ic_launcher_round.xml").write_text(adaptive_xml)
+(adaptive / "ic_launcher.xml").write_text(
+    adaptive_xml,
+    encoding="utf-8"
+)
 
-# FORCE Android to use the Kulzzy Radio icons
+(adaptive / "ic_launcher_round.xml").write_text(
+    adaptive_xml,
+    encoding="utf-8"
+)
+
+# Set the launcher icons in AndroidManifest.xml
 manifest = Path("android/app/src/main/AndroidManifest.xml")
 
 if not manifest.exists():
-    raise FileNotFoundError("AndroidManifest.xml was not found.")
+    raise FileNotFoundError("AndroidManifest.xml is missing.")
 
 content = manifest.read_text(encoding="utf-8")
 
 match = re.search(r"<application\b[^>]*>", content)
 
 if not match:
-    raise RuntimeError("Android application declaration was not found.")
+    raise RuntimeError("Android application tag was not found.")
 
 tag = match.group(0)
 
@@ -115,13 +137,19 @@ for attribute, value in [
         tag = tag[:-1] + f' android:{attribute}="{value}">'
 
 content = content[:match.start()] + tag + content[match.end():]
+
 manifest.write_text(content, encoding="utf-8")
 
-# Verify the generated icons
-for density in sizes:
+# Verify generated icon files
+for density, size in sizes.items():
     icon = res / f"mipmap-{density}" / "ic_launcher.png"
 
-    if not icon.exists() or icon.stat().st_size == 0:
-        raise RuntimeError(f"Icon generation failed: {icon}")
+    if not icon.exists():
+        raise RuntimeError(f"Missing icon: {icon}")
 
-print("SUCCESS: KULZZY RADIO LOGO GENERATED AND CONNECTED TO ANDROID.")
+    with Image.open(icon) as check:
+        if check.size != (size, size):
+            raise RuntimeError(f"Incorrect icon dimensions: {icon}")
+
+print("SUCCESS: OFFICIAL KULZZY RADIO LOGO GENERATED.")
+print("SUCCESS: ANDROID LAUNCHER ICONS CONFIGURED.")
