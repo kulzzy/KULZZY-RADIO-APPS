@@ -1,19 +1,15 @@
-name: Build Kulzzy Radio Android APK
+name: Build and Publish Kulzzy Radio APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
-    paths:
-      - 'package.json'
-      - 'capacitor.config.json'
-      - 'www/**'
-      - 'scripts/**'
-      - '.github/workflows/build-android.yml'
+    inputs:
+      release_tag:
+        description: "Release version"
+        required: true
+        default: "v1.0.0"
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   build-android:
@@ -39,7 +35,28 @@ jobs:
           python -m pip install --upgrade pip
           pip install Pillow
 
-      - name: Install project dependencies
+      - name: Restore persistent Android signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: kulzzy-android-signing-key-v1
+
+      - name: Prepare Android signing key
+        run: |
+          mkdir -p "$HOME/.android"
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -v \
+              -keystore "$HOME/.android/debug.keystore" \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000
+          fi
+
+      - name: Install dependencies
         run: npm install
 
       - name: Create Android application
@@ -51,19 +68,30 @@ jobs:
       - name: Download official Kulzzy Radio logo
         run: |
           curl -fL \
-          https://raw.githubusercontent.com/kulzzy/app/main/icon-512.png \
-          -o kulzzy-icon-512.png
+            https://raw.githubusercontent.com/kulzzy/app/main/icon-512.png \
+            -o kulzzy-icon-512.png
 
-      - name: Generate Android launcher icons
+      - name: Generate launcher icons
         run: python scripts/generate-icons.py
 
       - name: Build APK
         working-directory: android
         run: ./gradlew assembleDebug
 
-      - name: Save APK
-        uses: actions/upload-artifact@v4
-        with:
-          name: KULZZY-RADIO-ANDROID-APK
-          path: android/app/build/outputs/apk/debug/app-debug.apk
-          if-no-files-found: error
+      - name: Prepare direct APK download
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Kulzzy-Radio.apk
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ inputs.release_tag }}"
+
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --title "Kulzzy Radio $TAG" \
+              --notes "Official Kulzzy Radio Android application."
+          fi
+
+          gh release upload "$TAG" Kulzzy-Radio.apk --clobber
