@@ -6,7 +6,7 @@ on:
       release_tag:
         description: "Release version"
         required: true
-        default: "v1.0.1"
+        default: "v1.0.2"
 
 permissions:
   contents: write
@@ -66,6 +66,38 @@ jobs:
       - name: Sync application
         run: npx cap sync android
 
+      - name: Set application version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          file = Path("android/app/build.gradle")
+          content = file.read_text()
+
+          content, count1 = re.subn(
+              r'versionCode\s+\d+',
+              'versionCode 2',
+              content,
+              count=1
+          )
+
+          content, count2 = re.subn(
+              r"versionName\s+['\"][^'\"]+['\"]",
+              "versionName '1.0.2'",
+              content,
+              count=1
+          )
+
+          if count1 != 1 or count2 != 1:
+              raise RuntimeError(
+                  "Could not safely update Android version."
+              )
+
+          file.write_text(content)
+          print("SUCCESS: App version set to 1.0.2")
+          PY
+
       - name: Download official Kulzzy Radio logo
         run: |
           curl -fL \
@@ -81,7 +113,7 @@ jobs:
         working-directory: android
         run: ./gradlew clean assembleDebug
 
-      - name: Verify launcher icons inside finished APK
+      - name: Verify official icons inside APK
         run: |
           python - <<'PY'
           from pathlib import Path
@@ -90,53 +122,84 @@ jobs:
           from io import BytesIO
           import sys
 
-          apk = Path("android/app/build/outputs/apk/debug/app-debug.apk")
+          apk = Path(
+              "android/app/build/outputs/apk/debug/app-debug.apk"
+          )
 
           if not apk.exists():
               sys.exit("ERROR: APK was not created.")
 
+          densities = {
+              "mdpi": 48,
+              "hdpi": 72,
+              "xhdpi": 96,
+              "xxhdpi": 144,
+              "xxxhdpi": 192
+          }
+
           with ZipFile(apk) as z:
               names = set(z.namelist())
 
-              for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
-                  apk_icon = f"res/mipmap-{density}-v4/ic_launcher.png"
-                  generated_icon = Path(
-                      f"android/app/src/main/res/mipmap-{density}/ic_launcher.png"
+              for density, size in densities.items():
+
+                  for icon_name in [
+                      "ic_launcher.png",
+                      "ic_launcher_round.png"
+                  ]:
+
+                      apk_icon = (
+                          f"res/mipmap-{density}-v4/{icon_name}"
+                      )
+
+                      generated_icon = (
+                          Path("android/app/src/main/res")
+                          / f"mipmap-{density}"
+                          / icon_name
+                      )
+
+                      if apk_icon not in names:
+                          sys.exit(
+                              f"ERROR: Missing APK icon: {apk_icon}"
+                          )
+
+                      packaged = Image.open(
+                          BytesIO(z.read(apk_icon))
+                      ).convert("RGB")
+
+                      original = Image.open(
+                          generated_icon
+                      ).convert("RGB")
+
+                      if packaged.size != (size, size):
+                          sys.exit(
+                              f"ERROR: Wrong icon size: {apk_icon}"
+                          )
+
+                      if ImageChops.difference(
+                          packaged, original
+                      ).getbbox():
+                          sys.exit(
+                              f"ERROR: Icon image differs: {apk_icon}"
+                          )
+
+              adaptive_icons = [
+                  name for name in names
+                  if name.startswith("res/mipmap-anydpi-v26/")
+                  and name.endswith(".xml")
+              ]
+
+              if adaptive_icons:
+                  sys.exit(
+                      "ERROR: Old adaptive launcher icons remain in APK."
                   )
 
-                  if apk_icon not in names:
-                      sys.exit(f"ERROR: Missing APK icon: {apk_icon}")
-
-                  packaged = Image.open(
-                      BytesIO(z.read(apk_icon))
-                  ).convert("RGBA")
-
-                  original = Image.open(
-                      generated_icon
-                  ).convert("RGBA")
-
-                  if packaged.size != original.size:
-                      sys.exit(f"ERROR: Icon dimensions differ: {density}")
-
-                  if ImageChops.difference(packaged, original).getbbox():
-                      sys.exit(f"ERROR: Icon image differs: {density}")
-
-              if "res/drawable/ic_launcher_foreground.png" not in names:
-                  sys.exit("ERROR: Adaptive launcher foreground is missing.")
-
-              if not any(
-                  name.startswith("res/mipmap-anydpi-v26")
-                  and name.endswith("ic_launcher.xml")
-                  for name in names
-              ):
-                  sys.exit("ERROR: Adaptive launcher configuration is missing.")
-
-          print("VERIFIED: All five official launcher icons are inside the APK.")
-          print("VERIFIED: Adaptive launcher icon is inside the APK.")
+          print("VERIFIED: All five official launcher icon sizes.")
+          print("VERIFIED: All five official round launcher icon sizes.")
+          print("VERIFIED: Old adaptive icon configuration is absent.")
           print("APK SIZE:", apk.stat().st_size, "bytes")
           PY
 
-      - name: Verify Android application icon configuration
+      - name: Verify actual Android launcher icon selection
         working-directory: android
         run: |
           AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)
@@ -150,12 +213,50 @@ jobs:
 
           grep -E "^application:|^application-icon" ../apk-badging.txt
 
-          grep -q "application-icon" ../apk-badging.txt || {
-            echo "ERROR: Android launcher icon is not configured in the APK."
-            exit 1
-          }
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
 
-          echo "SUCCESS: Android application icon configuration verified."
+          content = Path("../apk-badging.txt").read_text()
+
+          app_line = re.search(
+              r"^application:.*$",
+              content,
+              re.MULTILINE
+          )
+
+          if not app_line:
+              sys.exit("ERROR: Application details missing.")
+
+          if not re.search(
+              r"icon='res/mipmap-[^']*/ic_launcher\.png'",
+              app_line.group(0)
+          ):
+              sys.exit(
+                  "ERROR: Android is not selecting the official PNG icon."
+              )
+
+          icon_lines = re.findall(
+              r"^application-icon[^:]*:'([^']+)'",
+              content,
+              re.MULTILINE
+          )
+
+          if not icon_lines:
+              sys.exit("ERROR: No Android launcher icon was selected.")
+
+          for icon in icon_lines:
+              if not re.fullmatch(
+                  r"res/mipmap-[^/]+/ic_launcher\.png",
+                  icon
+              ):
+                  sys.exit(
+                      f"ERROR: Unexpected launcher icon selected: {icon}"
+                  )
+
+          print("SUCCESS: Android selects the official Kulzzy Radio PNG icon.")
+          PY
 
       - name: Prepare APK download
         run: |
