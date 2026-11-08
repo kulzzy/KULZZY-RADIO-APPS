@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#06122a">
-<meta name="description" content="Download or install Kulzzy Radio on your device. Celebrating Lives Everyday.">
+<meta name="description" content="Install Kulzzy Radio on Android, iPhone, iPad, Windows, Mac and Linux.">
 <title>Kulzzy Radio Apps</title>
 
 <style>
@@ -17,14 +17,14 @@
 body {
     font-family: Arial, Helvetica, sans-serif;
     background: linear-gradient(160deg, #020817, #07152f 55%, #020817);
-    color: #ffffff;
+    color: #fff;
     min-height: 100vh;
     padding: 25px 16px 40px;
 }
 
 .container {
     width: 100%;
-    max-width: 650px;
+    max-width: 680px;
     margin: auto;
 }
 
@@ -33,13 +33,13 @@ header {
     padding: 20px 10px 30px;
 }
 
-.logo {
+.brand-logo {
     width: 115px;
     height: 115px;
     object-fit: contain;
     border-radius: 22px;
     margin-bottom: 17px;
-    background: #ffffff;
+    background: #fff;
 }
 
 h1 {
@@ -50,7 +50,6 @@ h1 {
 }
 
 .tagline {
-    color: #ffffff;
     margin-top: 9px;
     font-size: 15px;
     letter-spacing: 1px;
@@ -59,7 +58,7 @@ h1 {
 .intro {
     text-align: center;
     color: #d5dcec;
-    line-height: 1.6;
+    line-height: 1.7;
     margin-bottom: 25px;
     font-size: 15px;
 }
@@ -68,27 +67,29 @@ h1 {
     background: rgba(255,255,255,0.06);
     border: 1px solid rgba(255,215,0,0.35);
     border-radius: 19px;
-    padding: 24px 20px;
-    margin-bottom: 18px;
+    padding: 25px 21px;
+    margin-bottom: 20px;
     text-align: center;
 }
 
-.icon {
-    font-size: 43px;
-    margin-bottom: 12px;
+.device-picture {
+    width: 100px;
+    height: 100px;
+    margin: 0 auto 15px;
+    display: block;
 }
 
 .card h2 {
     color: #ffd700;
     font-size: 21px;
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 
 .card p {
     color: #d5dcec;
     font-size: 14px;
-    line-height: 1.6;
-    margin-bottom: 19px;
+    line-height: 1.7;
+    margin-bottom: 17px;
 }
 
 .button {
@@ -101,11 +102,7 @@ h1 {
     font-size: 15px;
     font-weight: 900;
     text-decoration: none;
-    transition: 0.2s;
-}
-
-.button:active {
-    transform: scale(0.98);
+    margin-top: 15px;
 }
 
 .secondary {
@@ -114,15 +111,32 @@ h1 {
     color: #ffd700;
 }
 
-.note {
-    font-size: 12px !important;
-    margin-top: 13px;
-    margin-bottom: 0 !important;
-    color: #b9c5d9 !important;
+.instructions {
+    text-align: left;
+    background: rgba(0,0,0,0.20);
+    border-radius: 12px;
+    padding: 16px 17px;
+    margin-top: 15px;
 }
 
-.open-app {
-    margin-top: 24px;
+.instructions h3 {
+    color: #ffd700;
+    font-size: 15px;
+    margin-bottom: 10px;
+}
+
+.instructions ol {
+    padding-left: 20px;
+    color: #e1e8f3;
+    font-size: 13px;
+    line-height: 1.9;
+}
+
+.note {
+    font-size: 12px !important;
+    color: #aebbd0 !important;
+    margin-top: 14px;
+    margin-bottom: 0 !important;
 }
 
 footer {
@@ -145,7 +159,7 @@ footer strong {
 
 <header>
     <img
-        class="logo"
+        class="brand-logo"
         src="https://raw.githubusercontent.com/kulzzy/app/main/logo.jpg"
         alt="Kulzzy Radio Logo"
     >
@@ -159,57 +173,163 @@ footer strong {
     Choose your device below to install our app.
 </p>
 
+<!-- ANDROID SECTION -->
 <section class="card">
-    <div class="icon">🤖</div>
-    <h2>ANDROID</h2>
-    <p>
-        Download and install the official Kulzzy Radio Android application
-        on your Android phone.
-    </p>
 
-    <a
-        class="button"
-        href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/v1.0.2/Kulzzy-Radio.apk"
-    >
-        DOWNLOAD ANDROID APP
-    </a>
+<svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="27" y="5" width="66" height="110" rx="12" fill="#ffd700"/>
+    <rect x="32" y="14" width="56" height="88" rx="5" fill="#06122a"/>
+    <rect x="52" y="8" width="16" height="3" rx="2" fill="#06122a"/>
+    <circle cx="60" cy="109" r="3" fill="#06122a"/>
+    <circle cx="47" cy="34" r="4" fill="#ffd700"/>
+    <circle cx="73" cy="34" r="4" fill="#ffd700"/>
+    <path d="M43 45 Q60 61 77 45" stroke="#ffd700" stroke-width="4" fill="none" stroke-linecap="round"/>
+    <path d="M42 25 L35 16 M78 25 L85 16" stroke="#ffd700" stroke-width="3" stroke-linecap="round"/>
+</svg>
+
+<h2>ANDROID PHONES</h2>
+
+<p>
+Download and install the official Kulzzy Radio Android application
+on your Android phone.
+</p>
+
+<a class="button"
+href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/v1.0.2/Kulzzy-Radio.apk">
+DOWNLOAD ANDROID APP
+</a>
+
+<div class="instructions">
+    <h3>How to install</h3>
+    <ol>
+        <li>Download the Android APK.</li>
+        <li>Open the downloaded APK file.</li>
+        <li>If prompted, allow installation from this source.</li>
+        <li>Follow the instructions to finish installing.</li>
+    </ol>
+</div>
+
 </section>
 
+
+<!-- IPHONE AND IPAD SECTION -->
 <section class="card">
-    <div class="icon">🍎</div>
-    <h2>iPHONE & iPAD</h2>
-    <p>
-        Install Kulzzy Radio on your Apple device using Safari.
-        No App Store download is required.
-    </p>
 
-    <a
-        class="button"
-        href="https://kulzzy.github.io/app/install.html"
-    >
-        INSTALL ON iPHONE
-    </a>
+<svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="9" y="20" width="49" height="88" rx="8" fill="#ffd700"/>
+    <rect x="14" y="27" width="39" height="72" rx="4" fill="#06122a"/>
+    <rect x="27" y="22" width="13" height="2" rx="1" fill="#06122a"/>
+    <circle cx="33.5" cy="103" r="2" fill="#06122a"/>
 
-    <p class="note">
-        Free installation through Apple's Add to Home Screen feature.
-        This is a web app, not an App Store download.
-    </p>
+    <rect x="65" y="8" width="47" height="100" rx="8" fill="#ffd700"/>
+    <rect x="70" y="16" width="37" height="80" rx="4" fill="#06122a"/>
+    <circle cx="88.5" cy="102" r="2" fill="#06122a"/>
+</svg>
+
+<h2>iPHONE &amp; iPAD</h2>
+
+<p>
+Install Kulzzy Radio on your Apple device using Safari.
+No App Store download is required.
+</p>
+
+<a class="button"
+href="https://kulzzy.github.io/app/">
+OPEN KULZZY RADIO
+</a>
+
+<div class="instructions">
+    <h3>How to install on iPhone or iPad</h3>
+    <ol>
+        <li>Open this page in Safari.</li>
+        <li>Visit the Kulzzy Radio app using the button above.</li>
+        <li>Tap the Share button in Safari.</li>
+        <li>Select Add to Home Screen.</li>
+        <li>Tap Add to finish installing.</li>
+    </ol>
+</div>
+
+<p class="note">
+This is a free web app installation, not an App Store download.
+</p>
+
 </section>
 
-<section class="card open-app">
-    <div class="icon">🎧</div>
+
+<!-- COMPUTER SECTION -->
+<section class="card">
+
+<svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="8" y="13" width="104" height="70" rx="7" fill="#ffd700"/>
+    <rect x="14" y="19" width="92" height="58" rx="3" fill="#06122a"/>
+    <path d="M53 84 L49 96 L71 96 L67 84" fill="#ffd700"/>
+    <path d="M35 100 L85 100 L94 108 L26 108 Z" fill="#ffd700"/>
+    <circle cx="60" cy="48" r="12" fill="#ffd700"/>
+    <path d="M54 48 L59 53 L67 42" stroke="#06122a" stroke-width="3" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
+
+<h2>COMPUTERS &amp; LAPTOPS</h2>
+
+<p>
+Install Kulzzy Radio on your Windows, Mac or Linux computer
+and access it directly from your desktop.
+</p>
+
+<a class="button"
+href="https://kulzzy.github.io/app/">
+OPEN KULZZY RADIO
+</a>
+
+<div class="instructions">
+    <h3>Windows — Google Chrome or Microsoft Edge</h3>
+    <ol>
+        <li>Open Kulzzy Radio in Chrome or Edge.</li>
+        <li>Look for the Install icon in the browser address bar.</li>
+        <li>Click Install and follow the instructions.</li>
+        <li>If the icon is not visible, open the browser menu and look for Install page as app.</li>
+    </ol>
+</div>
+
+<div class="instructions">
+    <h3>Mac — Safari or Google Chrome</h3>
+    <ol>
+        <li>Open Kulzzy Radio in Safari or Chrome.</li>
+        <li>In Safari, use File → Add to Dock (on supported macOS versions).</li>
+        <li>In Chrome, open the browser menu and select Install page as app if available.</li>
+        <li>Follow the instructions to finish.</li>
+    </ol>
+</div>
+
+<div class="instructions">
+    <h3>Linux — Google Chrome or Chromium</h3>
+    <ol>
+        <li>Open Kulzzy Radio in Chrome or Chromium.</li>
+        <li>Open the browser menu.</li>
+        <li>Select Install page as app if available.</li>
+        <li>Follow the instructions to finish.</li>
+    </ol>
+</div>
+
+<p class="note">
+Installation options may vary depending on your browser and operating system.
+</p>
+
+</section>
+
+
+<!-- OPEN APP -->
+<section class="card">
     <h2>LISTEN TO KULZZY RADIO</h2>
     <p>
         Visit our official radio app and enjoy the celebration.
     </p>
 
-    <a
-        class="button secondary"
-        href="https://kulzzy.github.io/app/"
-    >
-        OPEN KULZZY RADIO
+    <a class="button secondary"
+       href="https://kulzzy.github.io/app/">
+       OPEN KULZZY RADIO
     </a>
 </section>
+
 
 <footer>
     <strong>KULZZY RADIO NETWORK</strong><br>
