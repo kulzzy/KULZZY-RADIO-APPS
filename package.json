@@ -1,0 +1,21 @@
+{
+  "name": "kulzzy-radio-apps",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Official cross-platform app for Kulzzy Radio Network",
+  "scripts": {
+    "android:add": "cap add android",
+    "android:sync": "cap sync android",
+    "android:open": "cap open android",
+    "ios:add": "cap add ios",
+    "ios:sync": "cap sync ios"
+  },
+  "dependencies": {
+    "@capacitor/core": "^7.4.3",
+    "@capacitor/android": "^7.4.3",
+    "@capacitor/ios": "^7.4.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^7.4.3"
+  }
+}
