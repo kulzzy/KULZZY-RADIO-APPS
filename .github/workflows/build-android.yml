@@ -6,7 +6,7 @@ on:
       release_tag:
         description: "Release version"
         required: true
-        default: "v1.0.0"
+        default: "v1.0.1"
 
 permissions:
   contents: write
@@ -44,6 +44,7 @@ jobs:
       - name: Prepare Android signing key
         run: |
           mkdir -p "$HOME/.android"
+
           if [ ! -f "$HOME/.android/debug.keystore" ]; then
             keytool -genkeypair -v \
               -keystore "$HOME/.android/debug.keystore" \
@@ -68,17 +69,91 @@ jobs:
       - name: Download official Kulzzy Radio logo
         run: |
           curl -fL \
-            https://raw.githubusercontent.com/kulzzy/app/main/icon-512.png \
-            -o kulzzy-icon-512.png
+            https://raw.githubusercontent.com/kulzzy/app/main/logo.jpg \
+            -o kulzzy-logo.jpg
 
-      - name: Generate launcher icons
+          python -c "from PIL import Image; im=Image.open('kulzzy-logo.jpg'); print('Official logo:', im.size, im.format); assert im.width >= 100 and im.height >= 100"
+
+      - name: Generate official launcher icons
         run: python scripts/generate-icons.py
 
       - name: Build APK
         working-directory: android
-        run: ./gradlew assembleDebug
+        run: ./gradlew clean assembleDebug
 
-      - name: Prepare direct APK download
+      - name: Verify launcher icons inside finished APK
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          import sys
+
+          apk = Path("android/app/build/outputs/apk/debug/app-debug.apk")
+
+          if not apk.exists():
+              sys.exit("ERROR: APK was not created.")
+
+          with ZipFile(apk) as z:
+              names = set(z.namelist())
+
+              required = [
+                  "res/mipmap-mdpi-v4/ic_launcher.png",
+                  "res/mipmap-hdpi-v4/ic_launcher.png",
+                  "res/mipmap-xhdpi-v4/ic_launcher.png",
+                  "res/mipmap-xxhdpi-v4/ic_launcher.png",
+                  "res/mipmap-xxxhdpi-v4/ic_launcher.png",
+              ]
+
+              for item in required:
+                  if item not in names:
+                      sys.exit(f"ERROR: APK is missing {item}")
+
+              for density in ["mdpi", "hdpi", "xhdpi", "xxhdpi", "xxxhdpi"]:
+                  apk_icon = f"res/mipmap-{density}-v4/ic_launcher.png"
+                  generated_icon = Path(
+                      f"android/app/src/main/res/mipmap-{density}/ic_launcher.png"
+                  )
+
+                  if z.read(apk_icon) != generated_icon.read_bytes():
+                      sys.exit(f"ERROR: APK icon does not match generated icon: {density}")
+
+              if "res/drawable/ic_launcher_foreground.png" not in names:
+                  sys.exit("ERROR: Adaptive launcher foreground is missing.")
+
+              if not any(
+                  name.startswith("res/mipmap-anydpi-v26/")
+                  and name.endswith("ic_launcher.xml")
+                  for name in names
+              ):
+                  sys.exit("ERROR: Adaptive launcher configuration is missing.")
+
+          print("VERIFIED: All five official launcher icons are inside the APK.")
+          print("VERIFIED: Adaptive launcher icon is inside the APK.")
+          print("APK SIZE:", apk.stat().st_size, "bytes")
+          PY
+
+      - name: Verify Android application icon configuration
+        working-directory: android
+        run: |
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)
+
+          if [ -z "$AAPT" ]; then
+            echo "ERROR: Android build tools not found."
+            exit 1
+          fi
+
+          "$AAPT" dump badging app/build/outputs/apk/debug/app-debug.apk > ../apk-badging.txt
+
+          grep -E "^application:|^application-icon" ../apk-badging.txt
+
+          grep -q "application-icon" ../apk-badging.txt || {
+            echo "ERROR: Android launcher icon is not configured in the APK."
+            exit 1
+          }
+
+          echo "SUCCESS: Android application icon configuration verified."
+
+      - name: Prepare APK download
         run: |
           cp android/app/build/outputs/apk/debug/app-debug.apk Kulzzy-Radio.apk
 
