@@ -1,0 +1,17 @@
+{
+  "appId": "com.kulzzy.radio",
+  "appName": "Kulzzy Radio",
+  "webDir": "www",
+  "server": {
+    "url": "https://kulzzy.github.io/app/",
+    "cleartext": false,
+    "allowNavigation": [
+      "kulzzy.github.io",
+      "kulzzyradio.com",
+      "*.kulzzyradio.com"
+    ]
+  },
+  "android": {
+    "allowMixedContent": false
+  }
+}
