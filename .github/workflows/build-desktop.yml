@@ -1,0 +1,100 @@
+name: Build Kulzzy Radio Desktop Apps
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main, master]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            target: "--win nsis"
+          - os: macos-latest
+            target: "--mac dmg"
+          - os: ubuntu-latest
+            target: "--linux AppImage"
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Create desktop app files
+        shell: bash
+        run: |
+          cat > package.json <<'EOF'
+          {
+            "name": "kulzzy-radio",
+            "version": "1.0.0",
+            "description": "Kulzzy Radio Desktop App",
+            "main": "main.js",
+            "scripts": {
+              "start": "electron ."
+            },
+            "devDependencies": {
+              "electron": "^39.0.0",
+              "electron-builder": "^26.0.0"
+            },
+            "build": {
+              "appId": "com.kulzzy.radio",
+              "productName": "Kulzzy Radio",
+              "directories": {
+                "output": "dist"
+              },
+              "win": {
+                "target": ["nsis"]
+              },
+              "mac": {
+                "target": ["dmg"]
+              },
+              "linux": {
+                "target": ["AppImage"]
+              }
+            }
+          }
+          EOF
+
+          cat > main.js <<'EOF'
+          const { app, BrowserWindow } = require('electron');
+
+          function createWindow() {
+            const win = new BrowserWindow({
+              width: 1200,
+              height: 800,
+              title: 'Kulzzy Radio',
+              autoHideMenuBar: true
+            });
+
+            win.loadURL('https://kulzzy.github.io/app/');
+          }
+
+          app.whenReady().then(createWindow);
+
+          app.on('window-all-closed', () => {
+            if (process.platform !== 'darwin') app.quit();
+          });
+          EOF
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build installer
+        run: npx electron-builder ${{ matrix.target }} --publish never
+
+      - name: Save installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kulzzy-Radio-${{ matrix.os }}
+          path: dist/*
