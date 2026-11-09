@@ -1,13 +1,20 @@
-<!DOCTYPE html>
-<html lang="en">
+<!DOCTYPE html><html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#06122a">
 <meta name="description" content="Install Kulzzy Radio on Android, iPhone, iPad, Windows, Mac and Linux.">
-<title>Kulzzy Radio Apps</title>
+<title>Kulzzy Radio Apps</title><style>
+:root {
+    --navy: #030a18;
+    --navy-light: #0b1b35;
+    --gold: #ffd700;
+    --gold-light: #fff1a6;
+    --silver: #c9d0dc;
+    --diamond: #eaf7ff;
+    --white: #ffffff;
+}
 
-<style>
 * {
     box-sizing: border-box;
     margin: 0;
@@ -16,8 +23,10 @@
 
 body {
     font-family: Arial, Helvetica, sans-serif;
-    background: linear-gradient(160deg, #020817, #07152f 55%, #020817);
-    color: #fff;
+    background:
+        radial-gradient(circle at 50% 0%, #263b5a 0%, transparent 38%),
+        linear-gradient(145deg, #020611, #07152d 48%, #020611);
+    color: var(--white);
     min-height: 100vh;
     padding: 25px 16px 40px;
 }
@@ -39,11 +48,16 @@ header {
     object-fit: contain;
     border-radius: 22px;
     margin-bottom: 17px;
-    background: #fff;
+    background: var(--white);
+    border: 2px solid var(--gold);
+    box-shadow: 0 0 25px rgba(255,215,0,0.25);
 }
 
 h1 {
-    color: #ffd700;
+    background: linear-gradient(90deg, #b88a18, #fff1a6, #d4dbe7, #ffd700);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     font-size: 29px;
     font-weight: 900;
     letter-spacing: 1px;
@@ -53,6 +67,7 @@ h1 {
     margin-top: 9px;
     font-size: 15px;
     letter-spacing: 1px;
+    color: var(--silver);
 }
 
 .intro {
@@ -64,12 +79,28 @@ h1 {
 }
 
 .card {
-    background: rgba(255,255,255,0.06);
-    border: 1px solid rgba(255,215,0,0.35);
+    position: relative;
+    overflow: hidden;
+    background: linear-gradient(145deg, rgba(255,255,255,0.09), rgba(255,255,255,0.025));
+    border: 1px solid transparent;
     border-radius: 19px;
     padding: 25px 21px;
     margin-bottom: 20px;
     text-align: center;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+}
+
+.card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    padding: 1px;
+    border-radius: 19px;
+    background: linear-gradient(135deg, #ffd700, #eaf7ff, #9a7b2e, #c9d0dc);
+    -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
 }
 
 .device-picture {
@@ -80,7 +111,10 @@ h1 {
 }
 
 .card h2 {
-    color: #ffd700;
+    background: linear-gradient(90deg, #ffd700, #ffffff, #c9d0dc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
     font-size: 21px;
     margin-bottom: 12px;
 }
@@ -96,31 +130,39 @@ h1 {
     display: block;
     width: 100%;
     padding: 15px 12px;
-    background: #ffd700;
+    background: linear-gradient(100deg, #b88a18, #ffe77b, #d5dce8, #ffd700);
     color: #06122a;
+    border: 1px solid #fff0a0;
     border-radius: 10px;
     font-size: 15px;
     font-weight: 900;
     text-decoration: none;
     margin-top: 15px;
+    cursor: pointer;
+    box-shadow: 0 5px 18px rgba(255,215,0,0.15);
+}
+
+.button:active {
+    transform: scale(0.98);
 }
 
 .secondary {
-    background: transparent;
-    border: 1px solid #ffd700;
-    color: #ffd700;
+    background: linear-gradient(120deg, #142642, #263c59);
+    border: 1px solid var(--silver);
+    color: var(--gold);
 }
 
 .instructions {
     text-align: left;
-    background: rgba(0,0,0,0.20);
+    background: rgba(0,0,0,0.25);
+    border: 1px solid rgba(201,208,220,0.2);
     border-radius: 12px;
     padding: 16px 17px;
     margin-top: 15px;
 }
 
 .instructions h3 {
-    color: #ffd700;
+    color: var(--gold);
     font-size: 15px;
     margin-bottom: 10px;
 }
@@ -134,49 +176,46 @@ h1 {
 
 .note {
     font-size: 12px !important;
-    color: #aebbd0 !important;
+    color: var(--silver) !important;
     margin-top: 14px;
     margin-bottom: 0 !important;
+}
+
+.diamond {
+    color: var(--diamond);
 }
 
 footer {
     text-align: center;
     margin-top: 35px;
-    color: #9eabc0;
+    color: #aebbd0;
     font-size: 12px;
     line-height: 1.8;
 }
 
 footer strong {
-    color: #ffd700;
+    background: linear-gradient(90deg, #ffd700, #ffffff, #c9d0dc);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
 }
-</style>
-</head>
 
-<body>
-
-<div class="container">
-
-<header>
+[hidden] {
+    display: none !important;
+}
+</style></head><body><div class="container"><header>
     <img
         class="brand-logo"
         src="https://raw.githubusercontent.com/kulzzy/app/main/logo.jpg"
         alt="Kulzzy Radio Logo"
-    >
+    ><h1>KULZZY RADIO APPS</h1>
+<p class="tagline">Celebrating Lives Everyday</p>
+<p class="diamond" style="margin-top:12px;">✦ GOLD • SILVER • DIAMOND ✦</p>
 
-    <h1>KULZZY RADIO APPS</h1>
-    <p class="tagline">Celebrating Lives Everyday</p>
-</header>
-
-<p class="intro">
+</header><p class="intro">
     Welcome to Kulzzy Radio Network.<br>
     Choose your device below to install our app.
-</p>
-
-<!-- ANDROID SECTION -->
-<section class="card">
-
-<svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+</p><!-- ANDROID SECTION --><section class="card"><svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
     <rect x="27" y="5" width="66" height="110" rx="12" fill="#ffd700"/>
     <rect x="32" y="14" width="56" height="88" rx="5" fill="#06122a"/>
     <rect x="52" y="8" width="16" height="3" rx="2" fill="#06122a"/>
@@ -185,16 +224,10 @@ footer strong {
     <circle cx="73" cy="34" r="4" fill="#ffd700"/>
     <path d="M43 45 Q60 61 77 45" stroke="#ffd700" stroke-width="4" fill="none" stroke-linecap="round"/>
     <path d="M42 25 L35 16 M78 25 L85 16" stroke="#ffd700" stroke-width="3" stroke-linecap="round"/>
-</svg>
-
-<h2>ANDROID PHONES</h2>
-
-<p>
+</svg><h2>ANDROID PHONES</h2><p>
 Download and install the official Kulzzy Radio Android application
 on your Android phone.
-</p>
-
-<a class="button"
+</p><a class="button"
 href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/v1.0.2/Kulzzy-Radio.apk">
 DOWNLOAD ANDROID APP
 </a>
@@ -207,36 +240,20 @@ DOWNLOAD ANDROID APP
         <li>If prompted, allow installation from this source.</li>
         <li>Follow the instructions to finish installing.</li>
     </ol>
-</div>
-
-</section>
-
-<!-- IPHONE AND IPAD SECTION -->
-<section class="card">
-
-<svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+</div></section><!-- IPHONE AND IPAD SECTION --><section class="card"><svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
     <rect x="9" y="20" width="49" height="88" rx="8" fill="#ffd700"/>
     <rect x="14" y="27" width="39" height="72" rx="4" fill="#06122a"/>
     <rect x="27" y="22" width="13" height="2" rx="1" fill="#06122a"/>
-    <circle cx="33.5" cy="103" r="2" fill="#06122a"/>
+    <circle cx="33.5" cy="103" r="2" fill="#06122a"/><rect x="65" y="8" width="47" height="100" rx="8" fill="#c0c0c0"/>
+<rect x="70" y="16" width="37" height="80" rx="4" fill="#06122a"/>
+<circle cx="88.5" cy="102" r="2" fill="#06122a"/>
 
-    <rect x="65" y="8" width="47" height="100" rx="8" fill="#c0c0c0"/>
-    <rect x="70" y="16" width="37" height="80" rx="4" fill="#06122a"/>
-    <circle cx="88.5" cy="102" r="2" fill="#06122a"/>
-</svg>
-
-<h2>iPHONE &amp; iPAD</h2>
-
-<p>
+</svg><h2>iPHONE &amp; iPAD</h2><p>
 Bring Kulzzy Radio closer to you. Install it on your Apple device in a few simple steps.
-</p>
-
-<a class="button" href="https://kulzzy.github.io/app/" target="_blank">
+</p><a class="button" href="https://kulzzy.github.io/app/" target="_blank" rel="noopener">
 OPEN KULZZY RADIO
-</a>
-
-<div id="appleSafariInstructions" class="instructions" style="display:none;">
-    <h3>✨ Install Kulzzy Radio</h3>
+</a><div id="appleSafariInstructions" class="instructions" style="display:none;">
+    <h3>✦ Install Kulzzy Radio</h3>
     <ol>
         <li>Open Kulzzy Radio in Safari.</li>
         <li>Tap the Share icon at the bottom of Safari.</li>
@@ -244,31 +261,56 @@ OPEN KULZZY RADIO
         <li>Tap <strong>Add</strong> at the top right.</li>
     </ol>
     <p>🎉 Kulzzy Radio is now on your Home Screen!</p>
-</div>
-
-<div id="appleOtherBrowser" class="instructions" style="display:none;">
-    <h3 style="color:#ffd700;">One more step!</h3>
-
+</div><div id="appleOtherBrowser" class="instructions" style="display:none;">
+    <h3>One more step!</h3>
     <p>
     You're using a browser that may not support installing Kulzzy Radio directly.
     </p>
-
     <p>
     Please copy our app address, open Safari, paste the address and follow the installation instructions.
     </p>
-
     <button class="button" type="button" onclick="copyKulzzyAddress()">
         COPY APP ADDRESS
     </button>
-
     <p id="appleCopyMessage" style="color:#ffd700;"></p>
-</div>
-
-<p class="note">
+</div><p class="note">
 Free installation. No App Store download required.
-</p>
+</p></section><!-- COMPUTER INSTALLATION SECTION --><section class="card"><svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+    <rect x="10" y="12" width="100" height="70" rx="7" fill="#c9d0dc"/>
+    <rect x="16" y="18" width="88" height="57" rx="3" fill="#06122a"/>
+    <path d="M5 87 H115 L105 101 H15 Z" fill="#ffd700"/>
+    <path d="M43 87 H77 L81 94 H39 Z" fill="#06122a"/>
+    <path d="M49 39 L60 29 L71 39 L60 50 Z" fill="#ffd700"/>
+</svg><h2>COMPUTER &amp; LAPTOP</h2><p>
+Install Kulzzy Radio on your Windows, Mac or Linux computer and open it like a desktop application.
+</p><button class="button" id="computerInstallButton" type="button" onclick="installComputerApp()">
+    INSTALL KULZZY RADIO
+</button><div id="computerInstallInstructions" class="instructions" hidden>
+    <h3>✦ Install on your computer</h3>
+    <ol id="computerSteps">
+        <li>Open Kulzzy Radio in a supported browser.</li>
+        <li>Look for the install icon in the browser address bar or menu.</li>
+        <li>Select Install Kulzzy Radio.</li>
+        <li>Confirm the installation.</li>
+    </ol>
+</div><p id="computerInstallMessage" class="note" aria-live="polite">
+Click the button to begin installation.
+</p></section><!-- OPEN APP --><section class="card">
+    <h2>LISTEN TO KULZZY RADIO</h2>
+    <p>
+        Visit our official radio app and enjoy the celebration.
+    </p><a class="button secondary"
+   href="https://kulzzy.github.io/app/">
+   OPEN KULZZY RADIO
+</a>
 
-<script>
+</section><footer>
+    <strong>KULZZY RADIO NETWORK</strong><br>
+    Celebrating Lives Everyday<br>
+    Stay Tuned In<br>
+    <span class="diamond">✦ GOLD • SILVER • DIAMOND ✦</span>
+</footer></div><script>
+/* APPLE DEVICE INSTRUCTIONS */
 (function() {
     var ua = navigator.userAgent;
 
@@ -286,9 +328,14 @@ Free installation. No App Store download required.
         isSafari ? "block" : "none";
 
     document.getElementById("appleOtherBrowser").style.display =
-        isSafari ? "none" : "block";
+        isSafari ? "block" : "block";
+
+    if (isSafari) {
+        document.getElementById("appleOtherBrowser").style.display = "none";
+    }
 })();
 
+/* COPY APP ADDRESS */
 function copyKulzzyAddress() {
     var address = "https://kulzzy.github.io/app/";
     var message = document.getElementById("appleCopyMessage");
@@ -303,51 +350,88 @@ function copyKulzzyAddress() {
         window.prompt("Copy this Kulzzy Radio address:", address);
     }
 }
-</script>
 
-</section>
+/* COMPUTER INSTALLATION */
+var deferredInstallPrompt = null;
 
-<!-- COMPUTER INSTALLATION SECTION -->
-<section class="card">
+window.addEventListener("beforeinstallprompt", function(event) {
+    event.preventDefault();
+    deferredInstallPrompt = event;
+});
 
-<h2>COMPUTER & LAPTOP</h2>
+window.addEventListener("appinstalled", function() {
+    var message = document.getElementById("computerInstallMessage");
+    message.textContent = "Kulzzy Radio has been installed successfully!";
+    deferredInstallPrompt = null;
+});
 
-<p>
-Install Kulzzy Radio on your Windows, Mac or Linux computer.
-</p>
+function installComputerApp() {
+    var instructions = document.getElementById("computerInstallInstructions");
+    var steps = document.getElementById("computerSteps");
+    var message = document.getElementById("computerInstallMessage");
+    var button = document.getElementById("computerInstallButton");
 
-<a class="button"
-href="https://kulzzy.github.io/app/">
-INSTALL KULZZY RADIO
-</a>
+    if (window.matchMedia("(display-mode: standalone)").matches) {
+        message.textContent = "Kulzzy Radio is already installed.";
+        return;
+    }
 
-<p class="note">
-Open Kulzzy Radio, then select INSTALL APP when the browser offers installation.
-</p>
+    if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
 
-</section>
+        deferredInstallPrompt.userChoice.then(function(choice) {
+            if (choice.outcome === "accepted") {
+                message.textContent = "Installation started. Enjoy Kulzzy Radio!";
+            } else {
+                message.textContent = "Installation cancelled. You can try again whenever you're ready.";
+            }
 
-<!-- OPEN APP -->
-<section class="card">
-    <h2>LISTEN TO KULZZY RADIO</h2>
-    <p>
-        Visit our official radio app and enjoy the celebration.
-    </p>
+            deferredInstallPrompt = null;
+        });
 
-    <a class="button secondary"
-       href="https://kulzzy.github.io/app/">
-       OPEN KULZZY RADIO
-    </a>
-</section>
+        return;
+    }
 
+    var ua = navigator.userAgent;
 
-<footer>
-    <strong>KULZZY RADIO NETWORK</strong><br>
-    Celebrating Lives Everyday<br>
-    Stay Tuned In
-</footer>
+    var isMac = /Macintosh|Mac OS X/i.test(ua);
+    var isWindows = /Windows/i.test(ua);
+    var isLinux = /Linux/i.test(ua) && !/Android/i.test(ua);
+    var isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg|OPR/i.test(ua);
+    var isChrome = /Chrome|Chromium/i.test(ua);
+    var isEdge = /Edg/i.test(ua);
 
-</div>
+    steps.innerHTML = "";
 
-</body>
+    if (isMac && isSafari) {
+        steps.innerHTML =
+            "<li>Open Kulzzy Radio in Safari.</li>" +
+            "<li>Click File in the top menu.</li>" +
+            "<li>Select Add to Dock, if available in your Safari version.</li>" +
+            "<li>Follow the confirmation steps.</li>";
+    } else if (isMac && (isChrome || isEdge)) {
+        steps.innerHTML =
+            "<li>Open Kulzzy Radio in Chrome or Edge.</li>" +
+            "<li>Open the browser menu.</li>" +
+            "<li>Look for Install Kulzzy Radio or Install page as app.</li>" +
+            "<li>Select Install and confirm.</li>";
+    } else if ((isWindows || isLinux) && (isChrome || isEdge)) {
+        steps.innerHTML =
+            "<li>Open Kulzzy Radio in Chrome or Edge.</li>" +
+            "<li>Look for the install icon near the address bar, or open the browser menu.</li>" +
+            "<li>Select Install Kulzzy Radio or Install this site as an app.</li>" +
+            "<li>Confirm the installation.</li>";
+    } else {
+        steps.innerHTML =
+            "<li>Open Google Chrome or Microsoft Edge on your computer.</li>" +
+            "<li>Visit https://kulzzy.github.io/app/</li>" +
+            "<li>Open the browser menu and look for the Install option.</li>" +
+            "<li>Select Install Kulzzy Radio and confirm.</li>";
+    }
+
+    instructions.hidden = false;
+    message.textContent = "Follow the instructions below to install Kulzzy Radio.";
+    button.textContent = "INSTALLATION INSTRUCTIONS";
+}
+</script></body>
 </html>
