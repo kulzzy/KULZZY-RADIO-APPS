@@ -6,8 +6,7 @@ on:
     branches: [main, master]
 
 permissions:
-  contents: read
-
+  contents: write
 jobs:
   build:
     strategy:
@@ -98,3 +97,21 @@ jobs:
         with:
           name: Kulzzy-Radio-${{ matrix.os }}
           path: dist/*
+
+            release:
+    name: Publish Permanent Downloads
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all installers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Kulzzy-Radio-*
+          path: downloads
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: desktop-v1.0.0
+          name: Kulzzy Radio Desktop Apps v1.0.0
+          files: downloads/**/*
