@@ -3,21 +3,30 @@ name: Build Kulzzy Radio Desktop Apps
 on:
   workflow_dispatch:
   push:
-    branches: [main, master]
+    branches:
+      - main
+      - master
 
 permissions:
   contents: write
+  actions: read
+
 jobs:
   build:
+    name: Build ${{ matrix.platform }}
     strategy:
+      fail-fast: false
       matrix:
         include:
           - os: windows-latest
-            target: "--win nsis"
+            platform: Windows
+            target: --win nsis
           - os: macos-latest
-            target: "--mac dmg"
+            platform: macOS
+            target: --mac dmg
           - os: ubuntu-latest
-            target: "--linux AppImage"
+            platform: Linux
+            target: --linux AppImage
 
     runs-on: ${{ matrix.os }}
 
@@ -72,17 +81,31 @@ jobs:
             const win = new BrowserWindow({
               width: 1200,
               height: 800,
+              minWidth: 800,
+              minHeight: 600,
               title: 'Kulzzy Radio',
               autoHideMenuBar: true
             });
 
             win.loadURL('https://kulzzy.github.io/app/');
+
+            win.webContents.setWindowOpenHandler(({ url }) => {
+              const { shell } = require('electron');
+              shell.openExternal(url);
+              return { action: 'deny' };
+            });
           }
 
           app.whenReady().then(createWindow);
 
           app.on('window-all-closed', () => {
             if (process.platform !== 'darwin') app.quit();
+          });
+
+          app.on('activate', () => {
+            if (BrowserWindow.getAllWindows().length === 0) {
+              createWindow();
+            }
           });
           EOF
 
@@ -95,23 +118,39 @@ jobs:
       - name: Save installer
         uses: actions/upload-artifact@v4
         with:
-          name: Kulzzy-Radio-${{ matrix.os }}
+          name: Kulzzy-Radio-${{ matrix.platform }}
           path: dist/*
+          if-no-files-found: error
+          retention-days: 30
 
-            release:
+  release:
     name: Publish Permanent Downloads
     needs: build
     runs-on: ubuntu-latest
+
     steps:
       - name: Download all installers
         uses: actions/download-artifact@v4
         with:
           pattern: Kulzzy-Radio-*
           path: downloads
+          merge-multiple: true
 
       - name: Publish GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: desktop-v1.0.0
           name: Kulzzy Radio Desktop Apps v1.0.0
-          files: downloads/**/*
+          body: |
+            Official Kulzzy Radio desktop applications.
+
+            Windows: Download the .exe installer.
+            macOS: Download the .dmg installer.
+            Linux: Download the .AppImage installer.
+
+            Requires an internet connection to listen to Kulzzy Radio.
+          files: downloads/*
+          overwrite_files: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
