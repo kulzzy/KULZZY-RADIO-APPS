@@ -211,7 +211,6 @@ DOWNLOAD ANDROID APP
 
 </section>
 
-
 <!-- IPHONE AND IPAD SECTION -->
 <section class="card">
 
@@ -221,7 +220,7 @@ DOWNLOAD ANDROID APP
     <rect x="27" y="22" width="13" height="2" rx="1" fill="#06122a"/>
     <circle cx="33.5" cy="103" r="2" fill="#06122a"/>
 
-    <rect x="65" y="8" width="47" height="100" rx="8" fill="#ffd700"/>
+    <rect x="65" y="8" width="47" height="100" rx="8" fill="#c0c0c0"/>
     <rect x="70" y="16" width="37" height="80" rx="4" fill="#06122a"/>
     <circle cx="88.5" cy="102" r="2" fill="#06122a"/>
 </svg>
@@ -229,29 +228,82 @@ DOWNLOAD ANDROID APP
 <h2>iPHONE &amp; iPAD</h2>
 
 <p>
-Install Kulzzy Radio on your Apple device using Safari.
-No App Store download is required.
+Bring Kulzzy Radio closer to you. Install it on your Apple device in a few simple steps.
 </p>
 
-<a class="button"
-href="https://kulzzy.github.io/app/">
+<a class="button" href="https://kulzzy.github.io/app/" target="_blank">
 OPEN KULZZY RADIO
 </a>
 
-<div class="instructions">
-    <h3>How to install on iPhone or iPad</h3>
+<div id="appleSafariInstructions" class="instructions" style="display:none;">
+    <h3>✨ Install Kulzzy Radio</h3>
     <ol>
-        <li>Open this page in Safari.</li>
-        <li>Visit the Kulzzy Radio app using the button above.</li>
-        <li>Tap the Share button in Safari.</li>
-        <li>Select Add to Home Screen.</li>
-        <li>Tap Add to finish installing.</li>
+        <li>Open Kulzzy Radio in Safari.</li>
+        <li>Tap the Share icon at the bottom of Safari.</li>
+        <li>Select <strong>Add to Home Screen</strong>.</li>
+        <li>Tap <strong>Add</strong> at the top right.</li>
     </ol>
+    <p>🎉 Kulzzy Radio is now on your Home Screen!</p>
+</div>
+
+<div id="appleOtherBrowser" class="instructions" style="display:none;">
+    <h3 style="color:#ffd700;">One more step!</h3>
+
+    <p>
+    You're using a browser that may not support installing Kulzzy Radio directly.
+    </p>
+
+    <p>
+    Please copy our app address, open Safari, paste the address and follow the installation instructions.
+    </p>
+
+    <button class="button" type="button" onclick="copyKulzzyAddress()">
+        COPY APP ADDRESS
+    </button>
+
+    <p id="appleCopyMessage" style="color:#ffd700;"></p>
 </div>
 
 <p class="note">
-This is a free web app installation, not an App Store download.
+Free installation. No App Store download required.
 </p>
+
+<script>
+(function() {
+    var ua = navigator.userAgent;
+
+    var isAppleDevice =
+        /iPhone|iPad|iPod/i.test(ua) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+
+    if (!isAppleDevice) return;
+
+    var isSafari =
+        /Safari/i.test(ua) &&
+        !/CriOS|FxiOS|EdgiOS|OPiOS|DuckDuckGo|GSA|YaBrowser/i.test(ua);
+
+    document.getElementById("appleSafariInstructions").style.display =
+        isSafari ? "block" : "none";
+
+    document.getElementById("appleOtherBrowser").style.display =
+        isSafari ? "none" : "block";
+})();
+
+function copyKulzzyAddress() {
+    var address = "https://kulzzy.github.io/app/";
+    var message = document.getElementById("appleCopyMessage");
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(address).then(function() {
+            message.textContent = "Address copied! Open Safari and paste it.";
+        }).catch(function() {
+            window.prompt("Copy this Kulzzy Radio address:", address);
+        });
+    } else {
+        window.prompt("Copy this Kulzzy Radio address:", address);
+    }
+}
+</script>
 
 </section>
 
