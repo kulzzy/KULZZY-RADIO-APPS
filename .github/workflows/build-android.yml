@@ -1,371 +1,330 @@
 name: Build and Publish Kulzzy Radio APK
 
 on:
-workflow_dispatch:
-inputs:
-release_tag:
-description: "Release version"
-required: true
-default: "v1.0.3"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Release version"
+        required: true
+        default: "v1.0.3"
 
 permissions:
-contents: write
+  contents: write
 
 jobs:
-build-android:
-runs-on: ubuntu-latest
+  build-android:
+    runs-on: ubuntu-latest
 
-steps:
-  - name: Get project files
-    uses: actions/checkout@v4
+    steps:
+      - name: Get project files
+        uses: actions/checkout@v4
 
-  - name: Install Node.js
-    uses: actions/setup-node@v4
-    with:
-      node-version: 22
+      - name: Install Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-  - name: Install Java
-    uses: actions/setup-java@v4
-    with:
-      distribution: temurin
-      java-version: '21'
+      - name: Install Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
 
-  - name: Install Python and Pillow
-    run: |
-      python -m pip install --upgrade pip
-      pip install Pillow
+      - name: Install Python and Pillow
+        run: |
+          python -m pip install --upgrade pip
+          pip install Pillow
 
-  - name: Restore persistent Android signing key
-    uses: actions/cache@v4
-    with:
-      path: ~/.android/debug.keystore
-      key: kulzzy-android-signing-key-v1
+      - name: Restore persistent Android signing key
+        uses: actions/cache@v4
+        with:
+          path: ~/.android/debug.keystore
+          key: kulzzy-android-signing-key-v1
 
-  - name: Prepare Android signing key
-    run: |
-      mkdir -p "$HOME/.android"
+      - name: Prepare Android signing key
+        run: |
+          mkdir -p "$HOME/.android"
 
-      if [ ! -f "$HOME/.android/debug.keystore" ]; then
-        keytool -genkeypair -v \
-          -keystore "$HOME/.android/debug.keystore" \
-          -storepass android \
-          -alias androiddebugkey \
-          -keypass android \
-          -dname "CN=Android Debug,O=Android,C=US" \
-          -keyalg RSA \
-          -keysize 2048 \
-          -validity 10000
-      fi
+          if [ ! -f "$HOME/.android/debug.keystore" ]; then
+            keytool -genkeypair -v \
+              -keystore "$HOME/.android/debug.keystore" \
+              -storepass android \
+              -alias androiddebugkey \
+              -keypass android \
+              -dname "CN=Android Debug,O=Android,C=US" \
+              -keyalg RSA \
+              -keysize 2048 \
+              -validity 10000
+          fi
 
-  - name: Install dependencies
-    run: npm install
+      - name: Install dependencies
+        run: npm install
 
-  - name: Create Android application
-    run: npx cap add android
+      - name: Create Android application
+        run: npx cap add android
 
-  - name: Sync application
-    run: npx cap sync android
+      - name: Sync application
+        run: npx cap sync android
 
-  # CAMERA, MICROPHONE AND NOTIFICATION PERMISSIONS
+      - name: Add Android camera, microphone and notification permissions
+        run: |
+          python - <<'PY'
+          from pathlib import Path
 
-  - name: Add Android Permissions
-    run: |
-      python - <<'PY'
-      from pathlib import Path
+          manifest = Path("android/app/src/main/AndroidManifest.xml")
 
-      manifest = Path(
-          "android/app/src/main/AndroidManifest.xml"
-      )
+          if not manifest.exists():
+              raise SystemExit("ERROR: AndroidManifest.xml not found.")
 
-      if not manifest.exists():
-          raise SystemExit("ERROR: AndroidManifest.xml not found.")
+          content = manifest.read_text()
 
-      content = manifest.read_text()
-
-      permissions = [
-          "android.permission.CAMERA",
-          "android.permission.RECORD_AUDIO",
-          "android.permission.MODIFY_AUDIO_SETTINGS",
-          "android.permission.POST_NOTIFICATIONS"
-      ]
-
-      additions = ""
-
-      for permission in permissions:
-          if permission not in content:
-              additions += (
-                  f'    <uses-permission android:name="{permission}" />\n'
-              )
-
-      if additions:
-          if "<application" not in content:
-              raise SystemExit(
-                  "ERROR: Application section not found."
-              )
-
-          content = content.replace(
-              "<application",
-              additions + "    <application",
-              1
-          )
-
-      manifest.write_text(content)
-
-      print("SUCCESS: Android permissions configured.")
-
-      for permission in permissions:
-          print("VERIFIED:", permission)
-      PY
-
-  - name: Set application version
-    run: |
-      python - <<'PY'
-      from pathlib import Path
-      import re
-
-      file = Path("android/app/build.gradle")
-      content = file.read_text()
-
-      content, count1 = re.subn(
-          r'versionCode\s+\d+',
-          'versionCode 3',
-          content,
-          count=1
-      )
-
-      content, count2 = re.subn(
-          r"versionName\s+['\"][^'\"]+['\"]",
-          "versionName '1.0.3'",
-          content,
-          count=1
-      )
-
-      if count1 != 1 or count2 != 1:
-          raise RuntimeError(
-              "Could not safely update Android version."
-          )
-
-      file.write_text(content)
-      print("SUCCESS: App version set to 1.0.3")
-      PY
-
-  - name: Download official Kulzzy Radio logo
-    run: |
-      curl -fL \
-        https://raw.githubusercontent.com/kulzzy/app/main/logo.jpg \
-        -o kulzzy-logo.jpg
-
-      python -c "from PIL import Image; im=Image.open('kulzzy-logo.jpg'); print('Official logo:', im.size, im.format); assert im.width >= 100 and im.height >= 100"
-
-  - name: Generate official launcher icons
-    run: python scripts/generate-icons.py
-
-  - name: Build APK
-    working-directory: android
-    run: ./gradlew clean assembleDebug
-
-  - name: Verify Android Permissions Inside APK
-    run: |
-      AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)
-
-      if [ -z "$AAPT" ]; then
-        echo "ERROR: Android build tools not found."
-        exit 1
-      fi
-
-      APK="android/app/build/outputs/apk/debug/app-debug.apk"
-
-      "$AAPT" dump permissions "$APK" > apk-permissions.txt
-
-      cat apk-permissions.txt
-
-      python - <<'PY'
-      from pathlib import Path
-      import sys
-
-      content = Path("apk-permissions.txt").read_text()
-
-      required = [
-          "android.permission.CAMERA",
-          "android.permission.RECORD_AUDIO",
-          "android.permission.MODIFY_AUDIO_SETTINGS",
-          "android.permission.POST_NOTIFICATIONS"
-      ]
-
-      missing = [
-          permission
-          for permission in required
-          if permission not in content
-      ]
-
-      if missing:
-          print("ERROR: Missing permissions:")
-          for permission in missing:
-              print(permission)
-          sys.exit(1)
-
-      print("SUCCESS: All requested Android permissions are packaged.")
-      PY
-
-  - name: Verify official icons inside APK
-    run: |
-      python - <<'PY'
-      from pathlib import Path
-      from zipfile import ZipFile
-      from PIL import Image, ImageChops
-      from io import BytesIO
-      import sys
-
-      apk = Path(
-          "android/app/build/outputs/apk/debug/app-debug.apk"
-      )
-
-      if not apk.exists():
-          sys.exit("ERROR: APK was not created.")
-
-      densities = {
-          "mdpi": 48,
-          "hdpi": 72,
-          "xhdpi": 96,
-          "xxhdpi": 144,
-          "xxxhdpi": 192
-      }
-
-      with ZipFile(apk) as z:
-          names = set(z.namelist())
-
-          for density, size in densities.items():
-
-              for icon_name in [
-                  "ic_launcher.png",
-                  "ic_launcher_round.png"
-              ]:
-
-                  apk_icon = (
-                      f"res/mipmap-{density}-v4/{icon_name}"
-                  )
-
-                  generated_icon = (
-                      Path("android/app/src/main/res")
-                      / f"mipmap-{density}"
-                      / icon_name
-                  )
-
-                  if apk_icon not in names:
-                      sys.exit(
-                          f"ERROR: Missing APK icon: {apk_icon}"
-                      )
-
-                  packaged = Image.open(
-                      BytesIO(z.read(apk_icon))
-                  ).convert("RGB")
-
-                  original = Image.open(
-                      generated_icon
-                  ).convert("RGB")
-
-                  if packaged.size != (size, size):
-                      sys.exit(
-                          f"ERROR: Wrong icon size: {apk_icon}"
-                      )
-
-                  if ImageChops.difference(
-                      packaged, original
-                  ).getbbox():
-                      sys.exit(
-                          f"ERROR: Icon image differs: {apk_icon}"
-                      )
-
-          adaptive_icons = [
-              name for name in names
-              if name.startswith("res/mipmap-anydpi-v26/")
-              and name.endswith(".xml")
+          permissions = [
+              "android.permission.CAMERA",
+              "android.permission.RECORD_AUDIO",
+              "android.permission.MODIFY_AUDIO_SETTINGS",
+              "android.permission.POST_NOTIFICATIONS"
           ]
 
-          if adaptive_icons:
-              sys.exit(
-                  "ERROR: Old adaptive launcher icons remain in APK."
+          missing = [
+              permission for permission in permissions
+              if f'android:name="{permission}"' not in content
+          ]
+
+          if missing:
+              marker = "<application"
+
+              if marker not in content:
+                  raise SystemExit("ERROR: Application tag not found.")
+
+              additions = "".join(
+                  f'    <uses-permission android:name="{permission}" />\n'
+                  for permission in missing
               )
 
-      print("VERIFIED: All five official launcher icon sizes.")
-      print("VERIFIED: All five official round launcher icon sizes.")
-      print("VERIFIED: Old adaptive icon configuration is absent.")
-      print("APK SIZE:", apk.stat().st_size, "bytes")
-      PY
+              content = content.replace(
+                  marker,
+                  additions + marker,
+                  1
+              )
 
-  - name: Verify actual Android launcher icon selection
-    working-directory: android
-    run: |
-      AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)
+              manifest.write_text(content)
 
-      if [ -z "$AAPT" ]; then
-        echo "ERROR: Android build tools not found."
-        exit 1
-      fi
+          for permission in permissions:
+              if f'android:name="{permission}"' not in content:
+                  raise SystemExit(
+                      f"ERROR: Permission missing: {permission}"
+                  )
+              print("VERIFIED:", permission)
 
-      "$AAPT" dump badging app/build/outputs/apk/debug/app-debug.apk > ../apk-badging.txt
+          print("SUCCESS: Android permissions configured.")
+          PY
 
-      grep -E "^application:|^application-icon" ../apk-badging.txt
+      - name: Set application version
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
 
-      python - <<'PY'
-      from pathlib import Path
-      import re
-      import sys
+          file = Path("android/app/build.gradle")
+          content = file.read_text()
 
-      content = Path("../apk-badging.txt").read_text()
-
-      app_line = re.search(
-          r"^application:.*$",
-          content,
-          re.MULTILINE
-      )
-
-      if not app_line:
-          sys.exit("ERROR: Application details missing.")
-
-      if not re.search(
-          r"icon='res/mipmap-[^']*/ic_launcher\.png'",
-          app_line.group(0)
-      ):
-          sys.exit(
-              "ERROR: Android is not selecting the official PNG icon."
+          content, count1 = re.subn(
+              r'versionCode\s+\d+',
+              'versionCode 3',
+              content,
+              count=1
           )
 
-      icon_lines = re.findall(
-          r"^application-icon[^:]*:'([^']+)'",
-          content,
-          re.MULTILINE
-      )
+          content, count2 = re.subn(
+              r"versionName\s+['\"][^'\"]+['\"]",
+              "versionName '1.0.3'",
+              content,
+              count=1
+          )
 
-      if not icon_lines:
-          sys.exit("ERROR: No Android launcher icon was selected.")
-
-      for icon in icon_lines:
-          if not re.fullmatch(
-              r"res/mipmap-[^/]+/ic_launcher\.png",
-              icon
-          ):
-              sys.exit(
-                  f"ERROR: Unexpected launcher icon selected: {icon}"
+          if count1 != 1 or count2 != 1:
+              raise RuntimeError(
+                  "Could not safely update Android version."
               )
 
-      print("SUCCESS: Android selects the official Kulzzy Radio PNG icon.")
-      PY
+          file.write_text(content)
+          print("SUCCESS: App version set to 1.0.3")
+          PY
 
-  - name: Prepare APK download
-    run: |
-      cp android/app/build/outputs/apk/debug/app-debug.apk Kulzzy-Radio.apk
+      - name: Download official Kulzzy Radio logo
+        run: |
+          curl -fL \
+            https://raw.githubusercontent.com/kulzzy/app/main/logo.jpg \
+            -o kulzzy-logo.jpg
 
-  - name: Create GitHub Release
-    env:
-      GH_TOKEN: ${{ github.token }}
-    run: |
-      TAG="${{ inputs.release_tag }}"
+          python -c "from PIL import Image; im=Image.open('kulzzy-logo.jpg'); print('Official logo:', im.size, im.format); assert im.width >= 100 and im.height >= 100"
 
-      if ! gh release view "$TAG" >/dev/null 2>&1; then
-        gh release create "$TAG" \
-          --title "Kulzzy Radio $TAG" \
-          --notes "Official Kulzzy Radio Android application with camera and microphone permission support."
-      fi
+      - name: Generate official launcher icons
+        run: python scripts/generate-icons.py
 
-      gh release upload "$TAG" Kulzzy-Radio.apk --clobber
+      - name: Build APK
+        working-directory: android
+        run: ./gradlew clean assembleDebug
+
+      - name: Verify official icons inside APK
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          from zipfile import ZipFile
+          from PIL import Image, ImageChops
+          from io import BytesIO
+          import sys
+
+          apk = Path(
+              "android/app/build/outputs/apk/debug/app-debug.apk"
+          )
+
+          if not apk.exists():
+              sys.exit("ERROR: APK was not created.")
+
+          densities = {
+              "mdpi": 48,
+              "hdpi": 72,
+              "xhdpi": 96,
+              "xxhdpi": 144,
+              "xxxhdpi": 192
+          }
+
+          with ZipFile(apk) as z:
+              names = set(z.namelist())
+
+              for density, size in densities.items():
+
+                  for icon_name in [
+                      "ic_launcher.png",
+                      "ic_launcher_round.png"
+                  ]:
+
+                      apk_icon = (
+                          f"res/mipmap-{density}-v4/{icon_name}"
+                      )
+
+                      generated_icon = (
+                          Path("android/app/src/main/res")
+                          / f"mipmap-{density}"
+                          / icon_name
+                      )
+
+                      if apk_icon not in names:
+                          sys.exit(
+                              f"ERROR: Missing APK icon: {apk_icon}"
+                          )
+
+                      packaged = Image.open(
+                          BytesIO(z.read(apk_icon))
+                      ).convert("RGB")
+
+                      original = Image.open(
+                          generated_icon
+                      ).convert("RGB")
+
+                      if packaged.size != (size, size):
+                          sys.exit(
+                              f"ERROR: Wrong icon size: {apk_icon}"
+                          )
+
+                      if ImageChops.difference(
+                          packaged, original
+                      ).getbbox():
+                          sys.exit(
+                              f"ERROR: Icon image differs: {apk_icon}"
+                          )
+
+              adaptive_icons = [
+                  name for name in names
+                  if name.startswith("res/mipmap-anydpi-v26/")
+                  and name.endswith(".xml")
+              ]
+
+              if adaptive_icons:
+                  sys.exit(
+                      "ERROR: Old adaptive launcher icons remain in APK."
+                  )
+
+          print("VERIFIED: All five official launcher icon sizes.")
+          print("VERIFIED: All five official round launcher icon sizes.")
+          print("VERIFIED: Old adaptive icon configuration is absent.")
+          print("APK SIZE:", apk.stat().st_size, "bytes")
+          PY
+
+      - name: Verify actual Android launcher icon selection
+        working-directory: android
+        run: |
+          AAPT=$(find "$ANDROID_HOME/build-tools" -name aapt | sort -V | tail -n 1)
+
+          if [ -z "$AAPT" ]; then
+            echo "ERROR: Android build tools not found."
+            exit 1
+          fi
+
+          "$AAPT" dump badging app/build/outputs/apk/debug/app-debug.apk > ../apk-badging.txt
+
+          grep -E "^application:|^application-icon" ../apk-badging.txt
+
+          python - <<'PY'
+          from pathlib import Path
+          import re
+          import sys
+
+          content = Path("../apk-badging.txt").read_text()
+
+          app_line = re.search(
+              r"^application:.*$",
+              content,
+              re.MULTILINE
+          )
+
+          if not app_line:
+              sys.exit("ERROR: Application details missing.")
+
+          if not re.search(
+              r"icon='res/mipmap-[^']*/ic_launcher\.png'",
+              app_line.group(0)
+          ):
+              sys.exit(
+                  "ERROR: Android is not selecting the official PNG icon."
+              )
+
+          icon_lines = re.findall(
+              r"^application-icon[^:]*:'([^']+)'",
+              content,
+              re.MULTILINE
+          )
+
+          if not icon_lines:
+              sys.exit("ERROR: No Android launcher icon was selected.")
+
+          for icon in icon_lines:
+              if not re.fullmatch(
+                  r"res/mipmap-[^/]+/ic_launcher\.png",
+                  icon
+              ):
+                  sys.exit(
+                      f"ERROR: Unexpected launcher icon selected: {icon}"
+                  )
+
+          print("SUCCESS: Android selects the official Kulzzy Radio PNG icon.")
+          PY
+
+      - name: Prepare APK download
+        run: |
+          cp android/app/build/outputs/apk/debug/app-debug.apk Kulzzy-Radio.apk
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          TAG="${{ inputs.release_tag }}"
+
+          if ! gh release view "$TAG" >/dev/null 2>&1; then
+            gh release create "$TAG" \
+              --title "Kulzzy Radio $TAG" \
+              --notes "Official Kulzzy Radio Android application."
+          fi
+
+          gh release upload "$TAG" Kulzzy-Radio.apk --clobber
