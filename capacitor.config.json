@@ -3,9 +3,10 @@
   "appName": "Kulzzy Radio",
   "webDir": "www",
   "server": {
-    "url": "https://kulzzy.github.io/app/",
+    "url": "https://kulzzy1.netlify.app",
     "cleartext": false,
     "allowNavigation": [
+      "kulzzy1.netlify.app",
       "kulzzy.github.io",
       "kulzzyradio.com",
       "*.kulzzyradio.com"
