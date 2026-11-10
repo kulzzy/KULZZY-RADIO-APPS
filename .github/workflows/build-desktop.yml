@@ -1,338 +1,299 @@
 name: Build Kulzzy Radio Desktop Apps
 
 on:
-workflow_dispatch:
-push:
-branches:
-- main
-- master
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - master
 
 permissions:
-contents: write
-actions: read
+  contents: write
+  actions: read
 
 jobs:
-build:
-name: Build ${{ matrix.platform }}
-strategy:
-fail-fast: false
-matrix:
-include:
-- os: windows-latest
-platform: Windows
-target: --win nsis
+  build:
+    name: Build ${{ matrix.platform }}
+    runs-on: ${{ matrix.os }}
 
-      - os: macos-latest
-        platform: macOS
-        target: --mac dmg
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            platform: Windows
+            target: --win nsis
 
-      - os: ubuntu-latest
-        platform: Linux
-        target: --linux AppImage
+          - os: macos-latest
+            platform: macOS
+            target: --mac dmg
 
-runs-on: ${{ matrix.os }}
+          - os: ubuntu-latest
+            platform: Linux
+            target: --linux AppImage
 
-steps:
-  - name: Download project
-    uses: actions/checkout@v4
+    steps:
+      - name: Download project
+        uses: actions/checkout@v4
 
-  - name: Set up Node
-    uses: actions/setup-node@v4
-    with:
-      node-version: 22
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
 
-  - name: Create desktop app files
-    shell: bash
-    run: |
-      cat > package.json <<'EOF'
-      {
-        "name": "kulzzy-radio",
-        "version": "1.0.0",
-        "description": "Kulzzy Radio Desktop App",
-        "main": "main.js",
-        "scripts": {
-          "start": "electron ."
-        },
-        "devDependencies": {
-          "electron": "^39.0.0",
-          "electron-builder": "^26.0.0"
-        },
-        "build": {
-          "appId": "com.kulzzy.radio",
-          "productName": "Kulzzy Radio",
-          "directories": {
-            "output": "dist"
-          },
-          "win": {
-            "target": ["nsis"]
-          },
-          "mac": {
-            "target": ["dmg"],
-            "extendInfo": {
-              "NSCameraUsageDescription": "Kulzzy Radio needs camera access when you use camera features in the Community Feed.",
-              "NSMicrophoneUsageDescription": "Kulzzy Radio needs microphone access when you use microphone features."
-            }
-          },
-          "linux": {
-            "target": ["AppImage"]
-          }
-        }
-      }
-      EOF
-
-      cat > main.js <<'EOF'
-      const {
-        app,
-        BrowserWindow,
-        session,
-        shell
-      } = require('electron');
-
-      const MAIN_URL = 'https://kulzzy.github.io/app/';
-
-      const TRUSTED_ORIGINS = new Set([
-        'https://kulzzy.github.io',
-        'https://kulzzyradio.com',
-        'https://www.kulzzyradio.com'
-      ]);
-
-      function isTrustedOrigin(value) {
-        try {
-          const url = new URL(value);
-
-          return (
-            url.protocol === 'https:' &&
-            TRUSTED_ORIGINS.has(url.origin)
-          );
-
-        } catch (error) {
-          return false;
-        }
-      }
-
-      function configurePermissions() {
-
-        const appSession = session.defaultSession;
-
-        // CAMERA, MICROPHONE AND NOTIFICATION REQUESTS
-
-        appSession.setPermissionRequestHandler(
-          (webContents, permission, callback, details) => {
-
-            const requestingUrl =
-              details.requestingUrl ||
-              details.securityOrigin ||
-              '';
-
-            const trusted = isTrustedOrigin(requestingUrl);
-
-            if (!trusted) {
-              console.log(
-                'Permission denied for untrusted origin:',
-                requestingUrl,
-                permission
-              );
-
-              callback(false);
-              return;
-            }
-
-            if (permission === 'media') {
-
-              const mediaTypes = details.mediaTypes || [];
-
-              const requestsCamera =
-                mediaTypes.includes('video');
-
-              const requestsMicrophone =
-                mediaTypes.includes('audio');
-
-              if (requestsCamera || requestsMicrophone) {
-
-                console.log(
-                  'Camera/microphone permission requested:',
-                  mediaTypes
-                );
-
-                callback(true);
-                return;
+      - name: Create desktop app files
+        shell: bash
+        run: |
+          cat > package.json <<'EOF'
+          {
+            "name": "kulzzy-radio",
+            "version": "1.0.0",
+            "description": "Kulzzy Radio Desktop App",
+            "main": "main.js",
+            "scripts": {
+              "start": "electron ."
+            },
+            "devDependencies": {
+              "electron": "^39.0.0",
+              "electron-builder": "^26.0.0"
+            },
+            "build": {
+              "appId": "com.kulzzy.radio",
+              "productName": "Kulzzy Radio",
+              "directories": {
+                "output": "dist"
+              },
+              "win": {
+                "target": ["nsis"]
+              },
+              "mac": {
+                "target": ["dmg"],
+                "extendInfo": {
+                  "NSCameraUsageDescription": "Kulzzy Radio needs camera access for Community Feed camera features.",
+                  "NSMicrophoneUsageDescription": "Kulzzy Radio needs microphone access for audio features."
+                }
+              },
+              "linux": {
+                "target": ["AppImage"]
               }
-
-              callback(false);
-              return;
             }
-
-            if (permission === 'notifications') {
-
-              console.log(
-                'Notification permission requested:',
-                requestingUrl
-              );
-
-              callback(true);
-              return;
-            }
-
-            // Other permissions remain denied.
-
-            callback(false);
-
           }
-        );
+          EOF
 
-        // PERMISSION CHECKS
+          cat > main.js <<'EOF'
+          const {
+            app,
+            BrowserWindow,
+            session,
+            shell,
+            systemPreferences
+          } = require('electron');
 
-        appSession.setPermissionCheckHandler(
-          (webContents, permission, requestingOrigin, details) => {
+          const MAIN_URL = 'https://kulzzy.github.io/app/';
 
-            const requestingUrl =
-              details &&
-              details.requestingUrl
-                ? details.requestingUrl
-                : requestingOrigin;
+          const TRUSTED_ORIGINS = new Set([
+            'https://kulzzy.github.io',
+            'https://kulzzyradio.com',
+            'https://www.kulzzyradio.com'
+          ]);
 
-            if (!isTrustedOrigin(requestingUrl)) {
+          function isTrustedOrigin(value) {
+            try {
+              const url = new URL(value);
+              return url.protocol === 'https:' &&
+                     TRUSTED_ORIGINS.has(url.origin);
+            } catch {
               return false;
             }
+          }
 
-            if (
-              permission === 'media' ||
-              permission === 'notifications'
-            ) {
+          async function requestMediaAccess(mediaTypes) {
+            if (process.platform !== 'darwin') {
               return true;
             }
 
-            return false;
+            for (const type of mediaTypes) {
+              if (type === 'video') {
+                const allowed =
+                  await systemPreferences.askForMediaAccess('camera');
 
-          }
-        );
+                if (!allowed) return false;
+              }
 
-      }
+              if (type === 'audio') {
+                const allowed =
+                  await systemPreferences.askForMediaAccess('microphone');
 
-      function createWindow() {
-
-        const win = new BrowserWindow({
-
-          width: 1200,
-          height: 800,
-
-          minWidth: 800,
-          minHeight: 600,
-
-          title: 'Kulzzy Radio',
-
-          autoHideMenuBar: true,
-
-          webPreferences: {
-            contextIsolation: true,
-            nodeIntegration: false,
-            sandbox: true
-          }
-
-        });
-
-        win.loadURL(MAIN_URL);
-
-        win.webContents.setWindowOpenHandler(({ url }) => {
-
-          try {
-
-            const parsed = new URL(url);
-
-            if (
-              parsed.protocol === 'https:' ||
-              parsed.protocol === 'mailto:'
-            ) {
-              shell.openExternal(url);
+                if (!allowed) return false;
+              }
             }
 
-          } catch (error) {
-
-            console.error(
-              'Blocked invalid external link:',
-              url
-            );
-
+            return true;
           }
 
-          return {
-            action: 'deny'
-          };
+          function configurePermissions() {
+            const appSession = session.defaultSession;
 
-        });
+            appSession.setPermissionRequestHandler(
+              async (webContents, permission, callback, details = {}) => {
 
-      }
+                const requestingUrl =
+                  details.requestingUrl ||
+                  details.securityOrigin ||
+                  '';
 
-      app.whenReady().then(() => {
+                if (!isTrustedOrigin(requestingUrl)) {
+                  callback(false);
+                  return;
+                }
 
-        configurePermissions();
+                if (permission === 'media') {
+                  const mediaTypes = details.mediaTypes || [];
 
-        createWindow();
+                  if (
+                    !mediaTypes.includes('video') &&
+                    !mediaTypes.includes('audio')
+                  ) {
+                    callback(false);
+                    return;
+                  }
 
-      });
+                  try {
+                    const allowed =
+                      await requestMediaAccess(mediaTypes);
 
-      app.on('window-all-closed', () => {
+                    callback(allowed);
+                  } catch (error) {
+                    console.error('Media permission error:', error);
+                    callback(false);
+                  }
 
-        if (process.platform !== 'darwin') {
-          app.quit();
-        }
+                  return;
+                }
 
-      });
+                if (permission === 'notifications') {
+                  callback(true);
+                  return;
+                }
 
-      app.on('activate', () => {
+                callback(false);
+              }
+            );
 
-        if (BrowserWindow.getAllWindows().length === 0) {
-          createWindow();
-        }
+            appSession.setPermissionCheckHandler(
+              (webContents, permission, requestingOrigin) => {
 
-      });
-      EOF
+                if (!isTrustedOrigin(requestingOrigin)) {
+                  return false;
+                }
 
-  - name: Install dependencies
-    run: npm install
+                return (
+                  permission === 'media' ||
+                  permission === 'notifications'
+                );
+              }
+            );
+          }
 
-  - name: Build installer
-    run: npx electron-builder ${{ matrix.target }} --publish never
+          function createWindow() {
+            const win = new BrowserWindow({
+              width: 1200,
+              height: 800,
+              minWidth: 800,
+              minHeight: 600,
+              title: 'Kulzzy Radio',
+              autoHideMenuBar: true,
 
-  - name: Save installer
-    uses: actions/upload-artifact@v4
-    with:
-      name: Kulzzy-Radio-${{ matrix.platform }}
-      path: dist/*
-      if-no-files-found: error
-      retention-days: 30
+              webPreferences: {
+                contextIsolation: true,
+                nodeIntegration: false,
+                sandbox: true
+              }
+            });
 
-release:
-name: Publish Permanent Downloads
-needs: build
-runs-on: ubuntu-latest
+            win.loadURL(MAIN_URL);
 
-steps:
-  - name: Download all installers
-    uses: actions/download-artifact@v4
-    with:
-      pattern: Kulzzy-Radio-*
-      path: downloads
-      merge-multiple: true
+            win.webContents.setWindowOpenHandler(({ url }) => {
+              try {
+                const parsed = new URL(url);
 
-  - name: Publish GitHub Release
-    uses: softprops/action-gh-release@v2
-    with:
-      tag_name: desktop-v1.0.0
-      name: Kulzzy Radio Desktop Apps v1.0.0
-      body: |
-        Official Kulzzy Radio desktop applications.
+                if (
+                  parsed.protocol === 'https:' ||
+                  parsed.protocol === 'mailto:'
+                ) {
+                  shell.openExternal(url);
+                }
+              } catch (error) {
+                console.error('Blocked invalid external link:', url);
+              }
 
-        Windows: Download the .exe installer.
-        macOS: Download the .dmg installer.
-        Linux: Download the .AppImage installer.
+              return { action: 'deny' };
+            });
+          }
 
-        Camera and microphone permissions are supported.
-        Desktop notification permission handling is included.
+          app.whenReady().then(() => {
+            configurePermissions();
+            createWindow();
+          });
 
-        Requires an internet connection to listen to Kulzzy Radio.
-      files: downloads/*
-      overwrite_files: true
-      make_latest: true
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          app.on('window-all-closed', () => {
+            if (process.platform !== 'darwin') {
+              app.quit();
+            }
+          });
+
+          app.on('activate', () => {
+            if (BrowserWindow.getAllWindows().length === 0) {
+              createWindow();
+            }
+          });
+          EOF
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build installer
+        run: npx electron-builder ${{ matrix.target }} --publish never
+
+      - name: Save installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Kulzzy-Radio-${{ matrix.platform }}
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+
+  release:
+    name: Publish Permanent Downloads
+    needs: build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Download all installers
+        uses: actions/download-artifact@v4
+        with:
+          pattern: Kulzzy-Radio-*
+          path: downloads
+          merge-multiple: true
+
+      - name: Publish GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: desktop-v1.0.0
+          name: Kulzzy Radio Desktop Apps v1.0.0
+          body: |
+            Official Kulzzy Radio desktop applications.
+
+            Windows: Download the .exe installer.
+            macOS: Download the .dmg installer.
+            Linux: Download the .AppImage installer.
+
+            Camera and microphone permission handling is included.
+            Desktop notification permission handling is included.
+
+            Requires an internet connection to listen to Kulzzy Radio.
+          files: downloads/*
+          overwrite_files: true
+          make_latest: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
