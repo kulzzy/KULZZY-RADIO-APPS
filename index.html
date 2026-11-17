@@ -1,10 +1,13 @@
-<!DOCTYPE html><html lang="en">
+<!DOCTYPE html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="theme-color" content="#06122a">
 <meta name="description" content="Install Kulzzy Radio on Android, iPhone, iPad, Windows, Mac and Linux.">
-<title>Kulzzy Radio Apps Store</title><style>
+<title>Kulzzy Radio Apps Store</title>
+
+<style>
 :root {
     --navy: #030a18;
     --navy-light: #0b1b35;
@@ -77,6 +80,53 @@ h1 {
     margin-bottom: 25px;
     font-size: 15px;
 }
+
+/* INSTALLATION COUNTER */
+
+.install-counter {
+    position: relative;
+    text-align: center;
+    padding: 23px 15px;
+    margin-bottom: 25px;
+    border-radius: 18px;
+    background: linear-gradient(135deg, #102442, #030a18, #172d49);
+    border: 1px solid rgba(255,215,0,0.65);
+    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+}
+
+.counter-label {
+    color: var(--gold-light);
+    font-size: 13px;
+    font-weight: bold;
+    letter-spacing: 1.5px;
+    margin-bottom: 10px;
+}
+
+.counter-number {
+    font-size: 43px;
+    font-weight: 900;
+    letter-spacing: 2px;
+    background: linear-gradient(90deg, #ffd700, #ffffff, #ffd700);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+    font-variant-numeric: tabular-nums;
+}
+
+.counter-caption {
+    font-size: 13px;
+    color: #d5dcec;
+    margin-top: 8px;
+    line-height: 1.5;
+}
+
+.counter-status {
+    font-size: 11px;
+    color: #8de5a6;
+    margin-top: 10px;
+}
+
+/* GENERAL CARDS */
 
 .card {
     position: relative;
@@ -185,6 +235,128 @@ h1 {
     color: var(--diamond);
 }
 
+/* COMMENTS SECTION */
+
+.comments-section {
+    margin-top: 35px;
+    padding: 23px 18px;
+    background: linear-gradient(145deg, #102442, #030a18);
+    border: 1px solid rgba(255,215,0,0.65);
+    border-radius: 19px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+.comments-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 900;
+    color: var(--gold);
+    margin-bottom: 9px;
+}
+
+.comments-subtitle {
+    text-align: center;
+    color: #c9d0dc;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 22px;
+}
+
+.comment-input {
+    width: 100%;
+    padding: 14px;
+    margin-bottom: 13px;
+    border-radius: 9px;
+    border: 1px solid #66758d;
+    background: #06122a;
+    color: white;
+    font-size: 14px;
+    outline: none;
+}
+
+.comment-input:focus {
+    border-color: var(--gold);
+}
+
+.comment-input::placeholder {
+    color: #aebbd0;
+}
+
+textarea.comment-input {
+    min-height: 115px;
+    resize: vertical;
+    line-height: 1.6;
+}
+
+.comment-submit {
+    width: 100%;
+    padding: 15px;
+    border: none;
+    border-radius: 9px;
+    background: linear-gradient(100deg, #b88a18, #ffe77b, #ffd700);
+    color: #06122a;
+    font-size: 15px;
+    font-weight: 900;
+    cursor: pointer;
+}
+
+.comment-submit:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.comment-message {
+    text-align: center;
+    font-size: 13px;
+    margin-top: 12px;
+    line-height: 1.5;
+    color: var(--gold-light);
+}
+
+.comment-list-title {
+    margin-top: 30px;
+    margin-bottom: 15px;
+    color: var(--gold);
+    font-size: 16px;
+}
+
+.comment-item {
+    background: rgba(255,255,255,0.055);
+    border: 1px solid rgba(201,208,220,0.2);
+    border-radius: 11px;
+    padding: 14px;
+    margin-bottom: 12px;
+    text-align: left;
+}
+
+.comment-name {
+    color: var(--gold);
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 7px;
+}
+
+.comment-text {
+    color: #e4eaf3;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-wrap: anywhere;
+    white-space: pre-wrap;
+}
+
+.comment-date {
+    color: #9daec5;
+    font-size: 10px;
+    margin-top: 9px;
+}
+
+.empty-comments {
+    text-align: center;
+    color: #aebbd0;
+    font-size: 13px;
+    padding: 15px 5px;
+}
+
 footer {
     text-align: center;
     margin-top: 35px;
@@ -203,53 +375,128 @@ footer strong {
 [hidden] {
     display: none !important;
 }
-</style></head><body>
-<div class="container"><header>
-    <img
-        class="brand-logo"
-        src="https://raw.githubusercontent.com/kulzzy/app/main/logo.jpg"
-        alt="Kulzzy Radio Logo"
-    ><h1>KULZZY RADIO APPS STORE</h1>
+</style>
+
+<!-- FIREBASE LIBRARIES -->
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<header>
+
+<img
+class="brand-logo"
+src="https://raw.githubusercontent.com/kulzzy/app/main/logo.jpg"
+alt="Kulzzy Radio Logo"
+>
+
+<h1>KULZZY RADIO APPS STORE</h1>
+
 <p class="tagline">Install and Join us live on-air everyday</p>
 
-</header><p class="intro">
-    Choose your device below to install our app.
-</p><!-- ANDROID SECTION --><section class="card"><svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-    <rect x="27" y="5" width="66" height="110" rx="12" fill="#ffd700"/>
-    <rect x="32" y="14" width="56" height="88" rx="5" fill="#06122a"/>
-    <rect x="52" y="8" width="16" height="3" rx="2" fill="#06122a"/>
-    <circle cx="60" cy="109" r="3" fill="#06122a"/>
-    <circle cx="47" cy="34" r="4" fill="#ffd700"/>
-    <circle cx="73" cy="34" r="4" fill="#ffd700"/>
-    <path d="M43 45 Q60 61 77 45" stroke="#ffd700" stroke-width="4" fill="none" stroke-linecap="round"/>
-    <path d="M42 25 L35 16 M78 25 L85 16" stroke="#ffd700" stroke-width="3" stroke-linecap="round"/>
-</svg><h2>ANDROID PHONES</h2><p>
+</header>
+
+<!-- INSTALLATION COUNTER -->
+
+<div class="install-counter">
+
+<div class="counter-label">
+🏆 KULZZY RADIO APP INSTALLATIONS
+</div>
+
+<div class="counter-number" id="installationCount">
+1,128
+</div>
+
+<div class="counter-caption">
+People have installed Kulzzy Radio worldwide!
+</div>
+
+<div class="counter-status" id="counterStatus">
+● LIVE INSTALLATION COUNTER
+</div>
+
+</div>
+
+<p class="intro">
+Choose your device below to install our app.
+</p>
+
+
+<!-- ANDROID SECTION -->
+
+<section class="card">
+
+<svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+
+<rect x="27" y="5" width="66" height="110" rx="12" fill="#ffd700"/>
+<rect x="32" y="14" width="56" height="88" rx="5" fill="#06122a"/>
+<rect x="52" y="8" width="16" height="3" rx="2" fill="#06122a"/>
+<circle cx="60" cy="109" r="3" fill="#06122a"/>
+<circle cx="47" cy="34" r="4" fill="#ffd700"/>
+<circle cx="73" cy="34" r="4" fill="#ffd700"/>
+<path d="M43 45 Q60 61 77 45" stroke="#ffd700" stroke-width="4" fill="none" stroke-linecap="round"/>
+<path d="M42 25 L35 16 M78 25 L85 16" stroke="#ffd700" stroke-width="3" stroke-linecap="round"/>
+
+</svg>
+
+<h2>ANDROID PHONES</h2>
+
+<p>
 Download and install the official Kulzzy Radio Android application
 on your Android phone.
-</p><a class="button"
+</p>
+
+<a class="button"
 href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/v1.0.4/Kulzzy-Radio.apk">
 DOWNLOAD ANDROID APP
 </a>
 
 <div class="instructions">
-    <h3>How to install</h3>
-    <ol>
-        <li>Download the Android APK.</li>
-        <li>Open the downloaded APK file.</li>
-        <li>If prompted, allow installation from this source.</li>
-        <li>Follow the instructions to finish installing.</li>
-    </ol>
-</div></section><!-- IPHONE AND IPAD SECTION --><section class="card"><svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-    <rect x="9" y="20" width="49" height="88" rx="8" fill="#ffd700"/>
-    <rect x="14" y="27" width="39" height="72" rx="4" fill="#06122a"/>
-    <rect x="27" y="22" width="13" height="2" rx="1" fill="#06122a"/>
-    <circle cx="33.5" cy="103" r="2" fill="#06122a"/>
-    <rect x="65" y="8" width="47" height="100" rx="8" fill="#c0c0c0"/>
-    <rect x="70" y="16" width="37" height="80" rx="4" fill="#06122a"/>
-    <circle cx="88.5" cy="102" r="2" fill="#06122a"/>
-</svg><h2>iPHONE &amp; iPAD</h2><p>
+
+<h3>How to install</h3>
+
+<ol>
+<li>Download the Android APK.</li>
+<li>Open the downloaded APK file.</li>
+<li>If prompted, allow installation from this source.</li>
+<li>Follow the instructions to finish installing.</li>
+</ol>
+
+</div>
+
+</section>
+
+
+<!-- IPHONE AND IPAD SECTION -->
+
+<section class="card">
+
+<svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+
+<rect x="9" y="20" width="49" height="88" rx="8" fill="#ffd700"/>
+<rect x="14" y="27" width="39" height="72" rx="4" fill="#06122a"/>
+<rect x="27" y="22" width="13" height="2" rx="1" fill="#06122a"/>
+<circle cx="33.5" cy="103" r="2" fill="#06122a"/>
+<rect x="65" y="8" width="47" height="100" rx="8" fill="#c0c0c0"/>
+<rect x="70" y="16" width="37" height="80" rx="4" fill="#06122a"/>
+<circle cx="88.5" cy="102" r="2" fill="#06122a"/>
+
+</svg>
+
+<h2>iPHONE &amp; iPAD</h2>
+
+<p>
 Bring Kulzzy Radio closer to you. Install it on your Apple device in a few simple steps.
-</p><a class="button"
+</p>
+
+<a class="button"
 href="https://kulzzy-radio-main-app.pages.dev/"
 target="_blank"
 rel="noopener">
@@ -257,63 +504,484 @@ OPEN KULZZY RADIO
 </a>
 
 <div id="appleSafariInstructions" class="instructions" style="display:none;">
-    <h3>✦ Install Kulzzy Radio</h3>
-    <ol>
-        <li>Open Kulzzy Radio in Safari.</li>
-        <li>Tap the Share icon at the bottom of Safari.</li>
-        <li>Select <strong>Add to Home Screen</strong>.</li>
-        <li>Tap <strong>Add</strong> at the top right.</li>
-    </ol>
-    <p>🎉 Kulzzy Radio is now on your Home Screen!</p>
-</div><div id="appleOtherBrowser" class="instructions" style="display:none;">
-    <h3>One more step!</h3>
-    <p>
-    You're using a browser that may not support installing Kulzzy Radio directly.
-    </p>
-    <p>
-    Please copy our app address, open Safari, paste the address and follow the installation instructions.
-    </p><button class="button" type="button" onclick="copyKulzzyAddress()">
-    COPY APP ADDRESS
+
+<h3>✦ Install Kulzzy Radio</h3>
+
+<ol>
+<li>Open Kulzzy Radio in Safari.</li>
+<li>Tap the Share icon at the bottom of Safari.</li>
+<li>Select <strong>Add to Home Screen</strong>.</li>
+<li>Tap <strong>Add</strong> at the top right.</li>
+</ol>
+
+<p>🎉 Kulzzy Radio is now on your Home Screen!</p>
+
+</div>
+
+<div id="appleOtherBrowser" class="instructions" style="display:none;">
+
+<h3>One more step!</h3>
+
+<p>
+You're using a browser that may not support installing Kulzzy Radio directly.
+</p>
+
+<p>
+Please copy our app address, open Safari, paste the address and follow the installation instructions.
+</p>
+
+<button class="button" type="button" onclick="copyKulzzyAddress()">
+COPY APP ADDRESS
 </button>
 
 <p id="appleCopyMessage" style="color:#ffd700;"></p>
 
-</div><p class="note">
-Free installation. No App Store download required.
-</p></section><!-- COMPUTER INSTALLATION SECTION --><section class="card"><svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
-    <rect x="10" y="12" width="100" height="70" rx="7" fill="#c9d0dc"/>
-    <rect x="16" y="18" width="88" height="57" rx="3" fill="#06122a"/>
-    <path d="M5 87 H115 L105 101 H15 Z" fill="#ffd700"/>
-    <path d="M43 87 H77 L81 94 H39 Z" fill="#06122a"/>
-    <path d="M49 39 L60 29 L71 39 L60 50 Z" fill="#ffd700"/>
-</svg><h2>COMPUTER &amp; LAPTOP</h2><p>
-Install Kulzzy Radio on your Windows, Mac or Linux computer and open it like a desktop application.
-</p><a class="button" href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/desktop-v1.0.0/Kulzzy.Radio.Setup.1.0.0.exe">
-DOWNLOAD FOR WINDOWS
-</a><a class="button" href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/desktop-v1.0.0/Kulzzy.Radio-1.0.0-arm64.dmg">
-DOWNLOAD FOR MAC
-</a><a class="button" href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/desktop-v1.0.0/Kulzzy.Radio-1.0.0.AppImage">
-DOWNLOAD FOR LINUX
-</a><button class="button" id="computerInstallButton" type="button" onclick="installComputerApp()">
-    INSTALL KULZZY RADIO
-</button><div id="computerInstallInstructions" class="instructions" hidden>
-    <h3>✦ Install on your computer</h3>
-    <ol id="computerSteps">
-        <li>Open Kulzzy Radio in a supported browser.</li>
-        <li>Look for the install icon in the browser address bar or menu.</li>
-        <li>Select Install Kulzzy Radio.</li>
-        <li>Confirm the installation.</li>
-    </ol>
-</div><p id="computerInstallMessage" class="note" aria-live="polite">
-Click the button to begin installation.
-</p></section><footer>
-    <strong>KULZZY RADIO NETWORK</strong><br>
-    Celebrating Lives Everyday<br>
-    Stay Tuned In
-</footer></div><script>
+</div>
 
-/* APPLE DEVICE INSTRUCTIONS */
+<p class="note">
+Free installation. No App Store download required.
+</p>
+
+</section>
+
+
+<!-- COMPUTER INSTALLATION SECTION -->
+
+<section class="card">
+
+<svg class="device-picture" viewBox="0 0 120 120" xmlns="http://www.w3.org/2000/svg">
+
+<rect x="10" y="12" width="100" height="70" rx="7" fill="#c9d0dc"/>
+<rect x="16" y="18" width="88" height="57" rx="3" fill="#06122a"/>
+<path d="M5 87 H115 L105 101 H15 Z" fill="#ffd700"/>
+<path d="M43 87 H77 L81 94 H39 Z" fill="#06122a"/>
+<path d="M49 39 L60 29 L71 39 L60 50 Z" fill="#ffd700"/>
+
+</svg>
+
+<h2>COMPUTER &amp; LAPTOP</h2>
+
+<p>
+Install Kulzzy Radio on your Windows, Mac or Linux computer and open it like a desktop application.
+</p>
+
+<a class="button" href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/desktop-v1.0.0/Kulzzy.Radio.Setup.1.0.0.exe">
+DOWNLOAD FOR WINDOWS
+</a>
+
+<a class="button" href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/desktop-v1.0.0/Kulzzy.Radio-1.0.0-arm64.dmg">
+DOWNLOAD FOR MAC
+</a>
+
+<a class="button" href="https://github.com/kulzzy/KULZZY-RADIO-APPS/releases/download/desktop-v1.0.0/Kulzzy.Radio-1.0.0.AppImage">
+DOWNLOAD FOR LINUX
+</a>
+
+<button class="button" id="computerInstallButton" type="button" onclick="installComputerApp()">
+INSTALL KULZZY RADIO
+</button>
+
+<div id="computerInstallInstructions" class="instructions" hidden>
+
+<h3>✦ Install on your computer</h3>
+
+<ol id="computerSteps">
+<li>Open Kulzzy Radio in a supported browser.</li>
+<li>Look for the install icon in the browser address bar or menu.</li>
+<li>Select Install Kulzzy Radio.</li>
+<li>Confirm the installation.</li>
+</ol>
+
+</div>
+
+<p id="computerInstallMessage" class="note" aria-live="polite">
+Click the button to begin installation.
+</p>
+
+</section>
+
+
+<!-- PUBLIC COMMENTS SECTION -->
+
+<section class="comments-section" id="userComments">
+
+<div class="comments-title">
+💬 SHARE YOUR EXPERIENCE
+</div>
+
+<p class="comments-subtitle">
+How is Kulzzy Radio working on your device?<br>
+Tell us what you think. Your feedback helps us improve!
+</p>
+
+<input
+type="text"
+id="commentName"
+class="comment-input"
+maxlength="40"
+placeholder="Enter your name"
+autocomplete="name"
+>
+
+<textarea
+id="commentText"
+class="comment-input"
+maxlength="500"
+placeholder="Write your comment about Kulzzy Radio..."
+></textarea>
+
+<button
+class="comment-submit"
+id="commentSubmit"
+type="button"
+onclick="submitComment()"
+disabled>
+SUBMIT YOUR COMMENT
+</button>
+
+<div class="comment-message" id="commentMessage" aria-live="polite">
+Connecting to Kulzzy Radio...
+</div>
+
+<h3 class="comment-list-title">
+WHAT PEOPLE ARE SAYING
+</h3>
+
+<div id="commentList">
+
+<div class="empty-comments">
+Loading comments...
+</div>
+
+</div>
+
+</section>
+
+
+<footer>
+
+<strong>KULZZY RADIO NETWORK</strong><br>
+Celebrating Lives Everyday<br>
+Stay Tuned In
+
+</footer>
+
+</div>
+
+
+<script>
+
+/* =====================================
+   FIREBASE CONFIGURATION
+===================================== */
+
+const firebaseConfig = {
+
+    apiKey: "AIzaSyDB9FAkoACYzpV2Zo1JxakfbM-n6ulI4hc",
+
+    authDomain: "kulzzy-app-store.firebaseapp.com",
+
+    databaseURL: "https://kulzzy-app-store-default-rtdb.europe-west1.firebasedatabase.app/",
+
+    projectId: "kulzzy-app-store",
+
+    storageBucket: "kulzzy-app-store.firebasestorage.app",
+
+    messagingSenderId: "235874023923",
+
+    appId: "1:235874023923:web:a85287300ae114f3143a86"
+
+};
+
+
+/* INITIALIZE FIREBASE */
+
+firebase.initializeApp(firebaseConfig);
+
+const auth = firebase.auth();
+
+const db = firebase.database();
+
+
+/* =====================================
+   FIREBASE AUTHENTICATION
+===================================== */
+
+let currentUser = null;
+
+auth.onAuthStateChanged(async function(user) {
+
+    if (user) {
+
+        currentUser = user;
+
+        document.getElementById("commentSubmit").disabled = false;
+
+        document.getElementById("commentMessage").textContent =
+            "You're connected. Share your experience!";
+
+    } else {
+
+        try {
+
+            await auth.signInAnonymously();
+
+        } catch(error) {
+
+            document.getElementById("commentMessage").textContent =
+                "Connection error. Please refresh and try again.";
+
+            console.error(error);
+
+        }
+
+    }
+
+});
+
+
+/* =====================================
+   LIVE INSTALLATION COUNTER
+===================================== */
+
+/*
+1,128 is the starting figure.
+
+Every confirmed installation record added
+under installClaims increases the counter.
+
+The counter does not count downloads.
+*/
+
+const STARTING_INSTALLATIONS = 1128;
+
+const installationCount =
+    document.getElementById("installationCount");
+
+const counterStatus =
+    document.getElementById("counterStatus");
+
+
+db.ref("installClaims").on("value", function(snapshot) {
+
+    const recordedInstallations = snapshot.numChildren();
+
+    const total =
+        STARTING_INSTALLATIONS + recordedInstallations;
+
+    installationCount.textContent =
+        total.toLocaleString("en-US");
+
+    counterStatus.textContent =
+        "● LIVE INSTALLATION COUNTER";
+
+}, function(error) {
+
+    console.error("Counter error:", error);
+
+    counterStatus.textContent =
+        "Installation count temporarily unavailable.";
+
+});
+
+
+/* =====================================
+   PUBLIC COMMENTS
+===================================== */
+
+const commentsRef = db.ref("comments");
+
+
+/* DISPLAY COMMENTS LIVE */
+
+commentsRef.limitToLast(50).on("value", function(snapshot) {
+
+    const list = document.getElementById("commentList");
+
+    list.innerHTML = "";
+
+    if (!snapshot.exists()) {
+
+        list.innerHTML =
+            '<div class="empty-comments">Be the first to share your experience!</div>';
+
+        return;
+
+    }
+
+    const comments = [];
+
+    snapshot.forEach(function(child) {
+
+        comments.push(child.val());
+
+    });
+
+    comments.reverse();
+
+    comments.forEach(function(comment) {
+
+        const item = document.createElement("div");
+
+        item.className = "comment-item";
+
+        const name = document.createElement("div");
+
+        name.className = "comment-name";
+
+        name.textContent = comment.name || "Kulzzy Radio User";
+
+        const message = document.createElement("div");
+
+        message.className = "comment-text";
+
+        message.textContent = comment.message || "";
+
+        const date = document.createElement("div");
+
+        date.className = "comment-date";
+
+        if (comment.createdAt) {
+
+            date.textContent = new Date(
+                comment.createdAt
+            ).toLocaleString();
+
+        }
+
+        item.appendChild(name);
+
+        item.appendChild(message);
+
+        item.appendChild(date);
+
+        list.appendChild(item);
+
+    });
+
+}, function(error) {
+
+    console.error("Comment loading error:", error);
+
+    document.getElementById("commentList").textContent =
+        "Unable to load comments. Please refresh.";
+
+});
+
+
+/* =====================================
+   SUBMIT COMMENT
+===================================== */
+
+async function submitComment() {
+
+    const nameInput =
+        document.getElementById("commentName");
+
+    const textInput =
+        document.getElementById("commentText");
+
+    const message =
+        document.getElementById("commentMessage");
+
+    const button =
+        document.getElementById("commentSubmit");
+
+    const name = nameInput.value.trim();
+
+    const comment = textInput.value.trim();
+
+    if (!currentUser) {
+
+        message.textContent =
+            "Please wait while we connect you.";
+
+        return;
+
+    }
+
+    if (name.length < 2) {
+
+        message.textContent =
+            "Please enter your name.";
+
+        nameInput.focus();
+
+        return;
+
+    }
+
+    if (comment.length < 3) {
+
+        message.textContent =
+            "Please write a little more about your experience.";
+
+        textInput.focus();
+
+        return;
+
+    }
+
+    if (name.length > 40 || comment.length > 500) {
+
+        message.textContent =
+            "Your comment is too long.";
+
+        return;
+
+    }
+
+    button.disabled = true;
+
+    button.textContent = "SUBMITTING...";
+
+    message.textContent = "Sending your comment...";
+
+    try {
+
+        const newComment = commentsRef.push();
+
+        await newComment.set({
+
+            name: name,
+
+            message: comment,
+
+            createdAt: firebase.database.ServerValue.TIMESTAMP
+
+        });
+
+        nameInput.value = "";
+
+        textInput.value = "";
+
+        message.textContent =
+            "✓ Thank you! Your comment has been published.";
+
+    } catch(error) {
+
+        console.error("Comment submission error:", error);
+
+        message.textContent =
+            "Unable to submit your comment. Please try again.";
+
+    } finally {
+
+        button.disabled = false;
+
+        button.textContent = "SUBMIT YOUR COMMENT";
+
+    }
+
+}
+
+
+/* =====================================
+   APPLE DEVICE INSTRUCTIONS
+===================================== */
+
 (function() {
+
     var ua = navigator.userAgent;
 
     var isAppleDevice =
@@ -331,54 +999,118 @@ Click the button to begin installation.
 
     document.getElementById("appleOtherBrowser").style.display =
         isSafari ? "none" : "block";
+
 })();
 
 
-/* COPY APP ADDRESS */
+/* =====================================
+   COPY APP ADDRESS
+===================================== */
+
 function copyKulzzyAddress() {
 
     var address = "https://kulzzy-radio-main-app.pages.dev/";
+
     var message = document.getElementById("appleCopyMessage");
 
     if (navigator.clipboard && navigator.clipboard.writeText) {
 
         navigator.clipboard.writeText(address).then(function() {
-            message.textContent = "Address copied! Open Safari and paste it.";
+
+            message.textContent =
+                "Address copied! Open Safari and paste it.";
+
         }).catch(function() {
+
             window.prompt("Copy this Kulzzy Radio address:", address);
+
         });
 
     } else {
+
         window.prompt("Copy this Kulzzy Radio address:", address);
+
     }
+
 }
 
 
-/* COMPUTER INSTALLATION */
+/* =====================================
+   COMPUTER INSTALLATION
+===================================== */
+
 var deferredInstallPrompt = null;
 
 window.addEventListener("beforeinstallprompt", function(event) {
+
     event.preventDefault();
+
     deferredInstallPrompt = event;
+
 });
 
-window.addEventListener("appinstalled", function() {
-    var message = document.getElementById("computerInstallMessage");
-    message.textContent = "Kulzzy Radio has been installed successfully!";
+
+window.addEventListener("appinstalled", async function() {
+
+    var message =
+        document.getElementById("computerInstallMessage");
+
+    message.textContent =
+        "Kulzzy Radio has been installed successfully!";
+
     deferredInstallPrompt = null;
+
+    /*
+    This event is only recorded when this page
+    itself is installed as a PWA.
+
+    The actual Kulzzy Radio app needs its own
+    installation tracker for installations
+    made from the separate app website.
+    */
+
+    try {
+
+        if (currentUser) {
+
+            await db.ref("installClaims/" + currentUser.uid)
+                .set(true);
+
+        }
+
+    } catch(error) {
+
+        console.error("Installation recording error:", error);
+
+    }
+
 });
+
 
 function installComputerApp() {
 
-    var instructions = document.getElementById("computerInstallInstructions");
-    var steps = document.getElementById("computerSteps");
-    var message = document.getElementById("computerInstallMessage");
-    var button = document.getElementById("computerInstallButton");
+    var instructions =
+        document.getElementById("computerInstallInstructions");
+
+    var steps =
+        document.getElementById("computerSteps");
+
+    var message =
+        document.getElementById("computerInstallMessage");
+
+    var button =
+        document.getElementById("computerInstallButton");
+
 
     if (window.matchMedia("(display-mode: standalone)").matches) {
-        message.textContent = "Kulzzy Radio is already installed.";
+
+        message.textContent =
+            "Kulzzy Radio is already installed.";
+
         return;
+
     }
+
 
     if (deferredInstallPrompt) {
 
@@ -387,27 +1119,43 @@ function installComputerApp() {
         deferredInstallPrompt.userChoice.then(function(choice) {
 
             if (choice.outcome === "accepted") {
-                message.textContent = "Installation started. Enjoy Kulzzy Radio!";
+
+                message.textContent =
+                    "Installation started. Enjoy Kulzzy Radio!";
+
             } else {
-                message.textContent = "Installation cancelled. You can try again whenever you're ready.";
+
+                message.textContent =
+                    "Installation cancelled. You can try again whenever you're ready.";
+
             }
 
             deferredInstallPrompt = null;
+
         });
 
         return;
+
     }
+
 
     var ua = navigator.userAgent;
 
     var isMac = /Macintosh|Mac OS X/i.test(ua);
+
     var isWindows = /Windows/i.test(ua);
+
     var isLinux = /Linux/i.test(ua) && !/Android/i.test(ua);
+
     var isSafari = /Safari/i.test(ua) && !/Chrome|Chromium|Edg|OPR/i.test(ua);
+
     var isChrome = /Chrome|Chromium/i.test(ua);
+
     var isEdge = /Edg/i.test(ua);
 
+
     steps.innerHTML = "";
+
 
     if (isMac && isSafari) {
 
@@ -440,12 +1188,20 @@ function installComputerApp() {
             "<li>Visit https://kulzzy-radio-main-app.pages.dev/</li>" +
             "<li>Open the browser menu and look for the Install option.</li>" +
             "<li>Select Install Kulzzy Radio and confirm.</li>";
+
     }
 
+
     instructions.hidden = false;
-    message.textContent = "Follow the instructions below to install Kulzzy Radio.";
+
+    message.textContent =
+        "Follow the instructions below to install Kulzzy Radio.";
+
     button.textContent = "INSTALLATION INSTRUCTIONS";
+
 }
 
-</script></body>
+</script>
+
+</body>
 </html>
